@@ -1,0 +1,15 @@
+# yaml-language-server: $schema=../../../../schema.json
+section: profile
+dto: Profile
+
+fields:
+  name:
+    state: required
+  email:
+    state: required
+  birthDate:
+    state: required
+  age:
+    state: optional
+  score:
+    state: optional

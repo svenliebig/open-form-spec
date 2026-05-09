@@ -1,0 +1,218 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://open-form-spec.dev/schema.json",
+  "title": "Open Form Spec (OFS)",
+  "description": "Declarative specification for form field state rules. Defines whether fields are required, optional, or forbidden based on form values and external context.",
+  "type": "object",
+  "required": ["section", "dto", "fields"],
+  "additionalProperties": false,
+  "properties": {
+    "section": {
+      "type": "string",
+      "description": "Section identifier. Must match the form section name (e.g. 'registration')."
+    },
+    "dto": {
+      "type": "string",
+      "description": "Reference to the OpenAPI DTO schema name (e.g. 'Registration')."
+    },
+    "imports": {
+      "type": "object",
+      "description": "External references used in field conditions.",
+      "additionalProperties": false,
+      "properties": {
+        "enums": {
+          "type": "object",
+          "description": "Enum imports. Maps a local alias to an OpenAPI schema reference in the format 'source#SchemaName' (e.g. 'api#AccountType').",
+          "additionalProperties": {
+            "type": "string",
+            "pattern": "^[a-zA-Z0-9_-]+#[a-zA-Z0-9_]+$"
+          }
+        }
+      }
+    },
+    "context": {
+      "type": "object",
+      "description": "External data available during validation that is not part of the form section itself (e.g. app configuration, user info).",
+      "additionalProperties": {
+        "$ref": "#/definitions/contextObject"
+      }
+    },
+    "fields": {
+      "type": "object",
+      "description": "Field definitions with state rules. Keys must match DTO property names.",
+      "additionalProperties": {
+        "$ref": "#/definitions/field"
+      }
+    }
+  },
+  "definitions": {
+    "fieldState": {
+      "type": "string",
+      "enum": ["required", "optional", "forbidden"],
+      "description": "required = must have a value, optional = may have a value, forbidden = must not have a value (field is hidden and cleared)."
+    },
+    "contextObject": {
+      "type": "object",
+      "description": "Typed context object definition.",
+      "required": ["type"],
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": ["object"]
+        },
+        "properties": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/definitions/contextProperty"
+          }
+        }
+      }
+    },
+    "contextProperty": {
+      "type": "object",
+      "description": "A property within a context object.",
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": ["string", "boolean", "number"],
+          "description": "Primitive type of this context property."
+        },
+        "enum": {
+          "type": "string",
+          "description": "Reference to an imported enum alias. Mutually exclusive with 'type'."
+        }
+      }
+    },
+    "field": {
+      "type": "object",
+      "description": "A form field definition with its base state and optional conditional state changes.",
+      "required": ["state"],
+      "additionalProperties": false,
+      "properties": {
+        "state": {
+          "$ref": "#/definitions/fieldState",
+          "description": "Default state when no 'when' condition matches."
+        },
+        "when": {
+          "type": "array",
+          "description": "Conditions that override the base state. Evaluated in order — first match wins. If none match, 'state' applies.",
+          "items": {
+            "$ref": "#/definitions/whenEntry"
+          },
+          "minItems": 1
+        },
+        "fields": {
+          "type": "object",
+          "description": "Nested field definitions for object-typed fields (e.g. address sub-fields).",
+          "additionalProperties": {
+            "$ref": "#/definitions/field"
+          }
+        }
+      }
+    },
+    "whenEntry": {
+      "description": "A condition that changes a field's state. Either a simple condition or a compound condition using 'all'.",
+      "oneOf": [
+        { "$ref": "#/definitions/simpleWhen" },
+        { "$ref": "#/definitions/compoundWhen" }
+      ]
+    },
+    "simpleWhen": {
+      "type": "object",
+      "description": "A single condition. Must specify exactly one source (field, context, or section+field) and one comparator (is, isNot, in, notIn).",
+      "required": ["then"],
+      "additionalProperties": false,
+      "properties": {
+        "field": {
+          "type": "string",
+          "description": "Field name in the same section. Use dot notation for nested fields (e.g. 'address.street')."
+        },
+        "section": {
+          "type": "string",
+          "description": "Section name for cross-section field references. Must be used together with 'field'."
+        },
+        "context": {
+          "type": "string",
+          "description": "Dot-notation path to a context property (e.g. 'config.requirePhone')."
+        },
+        "is": {
+          "description": "Value must be strictly equal to this. Supports literals (true, false, numbers, strings) and enum references (e.g. 'AccountType.BUSINESS')."
+        },
+        "isNot": {
+          "description": "Value must not be strictly equal to this."
+        },
+        "in": {
+          "type": "array",
+          "description": "Value must be one of these values.",
+          "minItems": 1
+        },
+        "notIn": {
+          "type": "array",
+          "description": "Value must not be one of these values.",
+          "minItems": 1
+        },
+        "then": {
+          "$ref": "#/definitions/fieldState",
+          "description": "The state to apply when this condition matches."
+        }
+      }
+    },
+    "compoundWhen": {
+      "type": "object",
+      "description": "Multiple conditions that must ALL match (logical AND).",
+      "required": ["all", "then"],
+      "additionalProperties": false,
+      "properties": {
+        "all": {
+          "type": "array",
+          "description": "All conditions must match for this entry to apply.",
+          "items": {
+            "$ref": "#/definitions/conditionExpr"
+          },
+          "minItems": 2
+        },
+        "then": {
+          "$ref": "#/definitions/fieldState",
+          "description": "The state to apply when all conditions match."
+        }
+      }
+    },
+    "conditionExpr": {
+      "type": "object",
+      "description": "A single condition expression within a compound 'all' block.",
+      "additionalProperties": false,
+      "properties": {
+        "field": {
+          "type": "string",
+          "description": "Field name in the same section."
+        },
+        "section": {
+          "type": "string",
+          "description": "Section name for cross-section field references."
+        },
+        "context": {
+          "type": "string",
+          "description": "Dot-notation path to a context property."
+        },
+        "is": {
+          "description": "Value must be strictly equal to this."
+        },
+        "isNot": {
+          "description": "Value must not be strictly equal to this."
+        },
+        "in": {
+          "type": "array",
+          "description": "Value must be one of these values.",
+          "minItems": 1
+        },
+        "notIn": {
+          "type": "array",
+          "description": "Value must not be one of these values.",
+          "minItems": 1
+        }
+      }
+    }
+  }
+}

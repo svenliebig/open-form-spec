@@ -1,0 +1,91 @@
+# yaml-language-server: $schema=../../../../schema.json
+section: checkout
+dto: Checkout
+
+imports:
+  enums:
+    PaymentMethod: "api#PaymentMethod"
+    ShippingSpeed: "api#ShippingSpeed"
+
+context:
+  shop:
+    type: object
+    properties:
+      giftWrapEnabled:
+        type: boolean
+
+fields:
+  email:
+    state: required
+
+  paymentMethod:
+    state: required
+
+  # Credit card fields — only when paying by card
+  cardNumber:
+    state: forbidden
+    when:
+      - field: paymentMethod
+        is: PaymentMethod.CREDIT_CARD
+        then: required
+  cardExpiry:
+    state: forbidden
+    when:
+      - field: paymentMethod
+        is: PaymentMethod.CREDIT_CARD
+        then: required
+
+  # Bank transfer — only IBAN needed
+  iban:
+    state: forbidden
+    when:
+      - field: paymentMethod
+        is: PaymentMethod.BANK_TRANSFER
+        then: required
+
+  # PayPal — email for PayPal account
+  paypalEmail:
+    state: forbidden
+    when:
+      - field: paymentMethod
+        is: PaymentMethod.PAYPAL
+        then: required
+
+  shippingSpeed:
+    state: required
+
+  # Gift wrap — only when shop enables it
+  giftWrap:
+    state: forbidden
+    when:
+      - context: shop.giftWrapEnabled
+        is: true
+        then: optional
+
+  # Gift message — only when gift wrap is selected AND shop enables it
+  giftMessage:
+    state: forbidden
+    when:
+      - all:
+          - context: shop.giftWrapEnabled
+            is: true
+          - field: giftWrap
+            is: true
+        then: optional
+
+  # Nested shipping address — required for non-digital delivery
+  shippingAddress:
+    state: required
+    when:
+      - field: shippingSpeed
+        is: ShippingSpeed.OVERNIGHT
+        then: required
+    fields:
+      street:
+        state: required
+      city:
+        state: required
+      zip:
+        state: required
+      country:
+        state: required

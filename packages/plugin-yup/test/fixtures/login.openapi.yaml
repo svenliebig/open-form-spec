@@ -1,0 +1,16 @@
+openapi: 3.0.3
+info:
+  title: Login API
+  version: 0.1.0
+
+paths: {}
+
+components:
+  schemas:
+    Login:
+      type: object
+      properties:
+        email:
+          type: string
+        password:
+          type: string

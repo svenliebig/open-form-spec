@@ -1,0 +1,18 @@
+# yaml-language-server: $schema=../../../../schema.json
+section: order
+dto: Order
+
+imports:
+  enums:
+    OrderStatus: "api#OrderStatus"
+    Priority: "api#Priority"
+
+fields:
+  customerName:
+    state: required
+  status:
+    state: required
+  priority:
+    state: optional
+  notes:
+    state: optional

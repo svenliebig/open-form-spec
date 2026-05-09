@@ -1,0 +1,9 @@
+# yaml-language-server: $schema=../../../../schema.json
+section: login
+dto: Login
+
+fields:
+  email:
+    state: required
+  password:
+    state: required

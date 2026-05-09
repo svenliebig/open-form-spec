@@ -1,0 +1,5 @@
+node_modules
+dist
+
+# Generated test result files
+*.testresult.ts

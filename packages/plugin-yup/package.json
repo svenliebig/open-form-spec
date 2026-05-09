@@ -1,0 +1,23 @@
+{
+  "name": "@ofs/plugin-yup",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "dist/src/index.js",
+  "types": "dist/src/index.d.ts",
+  "scripts": {
+    "build": "npm run clean && tsc",
+    "clean": "rm -rf dist",
+    "test": "node --test dist/**/*.test.js"
+  },
+  "dependencies": {
+    "@ofs/types": "*",
+    "@ofs/plugin": "*"
+  },
+  "devDependencies": {
+    "typescript": "~5.8.0",
+    "@types/node": "^22.0.0",
+    "@ofs/core": "*",
+    "@ofs/validator": "*"
+  }
+}

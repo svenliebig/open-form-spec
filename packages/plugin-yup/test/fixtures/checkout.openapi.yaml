@@ -1,0 +1,58 @@
+openapi: 3.0.3
+info:
+  title: Checkout API
+  version: 0.1.0
+
+paths: {}
+
+components:
+  schemas:
+    PaymentMethod:
+      type: string
+      enum:
+        - CREDIT_CARD
+        - BANK_TRANSFER
+        - PAYPAL
+
+    ShippingSpeed:
+      type: string
+      enum:
+        - STANDARD
+        - EXPRESS
+        - OVERNIGHT
+
+    Checkout:
+      type: object
+      properties:
+        email:
+          type: string
+        paymentMethod:
+          $ref: "#/components/schemas/PaymentMethod"
+        cardNumber:
+          type: string
+        cardExpiry:
+          type: string
+        iban:
+          type: string
+        paypalEmail:
+          type: string
+        shippingSpeed:
+          $ref: "#/components/schemas/ShippingSpeed"
+        giftWrap:
+          type: boolean
+        giftMessage:
+          type: string
+        shippingAddress:
+          $ref: "#/components/schemas/Address"
+
+    Address:
+      type: object
+      properties:
+        street:
+          type: string
+        city:
+          type: string
+        zip:
+          type: string
+        country:
+          type: string

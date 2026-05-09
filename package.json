@@ -1,0 +1,9 @@
+{
+  "name": "open-form-spec",
+  "private": true,
+  "workspaces": ["packages/*"],
+  "scripts": {
+    "build": "npm -w @ofs/types run build && npm -w @ofs/plugin run build && npm -w @ofs/core run build && npm -w @ofs/validator run build && npm -w @ofs/runner run build && npm -w @ofs/plugin-yup run build",
+    "test": "npm -w @ofs/core run test && npm -w @ofs/validator run test && npm -w @ofs/runner run test && npm -w @ofs/plugin-yup run test"
+  }
+}

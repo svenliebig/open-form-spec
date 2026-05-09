@@ -1,0 +1,26 @@
+{
+  "name": "@ofs/runner",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "bin": {
+    "ofs": "dist/cli.js"
+  },
+  "scripts": {
+    "build": "npm run clean && tsc",
+    "clean": "rm -rf dist",
+    "test": "node --test dist/**/*.test.js"
+  },
+  "dependencies": {
+    "@ofs/types": "*",
+    "@ofs/core": "*",
+    "@ofs/validator": "*",
+    "@ofs/plugin": "*"
+  },
+  "devDependencies": {
+    "typescript": "~5.8.0",
+    "@types/node": "^22.0.0"
+  }
+}

@@ -1,0 +1,100 @@
+# yaml-language-server: $schema=../schema.json
+#
+# Abstract example demonstrating all OFS features.
+# Used for testing the spec tooling — not a real form.
+section: registration
+dto: Registration
+
+imports:
+  enums:
+    AccountType: "api#AccountType"
+    Country: "api#Country"
+
+context:
+  config:
+    type: object
+    properties:
+      requirePhone:
+        type: boolean
+      region:
+        enum: Country
+
+fields:
+  # Always required
+  email:
+    state: required
+  password:
+    state: required
+
+  # Always optional
+  nickname:
+    state: optional
+
+  # Conditional on context (single condition)
+  phone:
+    state: optional
+    when:
+      - context: config.requirePhone
+        is: true
+        then: required
+
+  # Conditional on same-section field
+  accountType:
+    state: required
+  companyName:
+    state: forbidden
+    when:
+      - field: accountType
+        is: AccountType.BUSINESS
+        then: required
+
+  # Conditional with 'in' comparator
+  taxId:
+    state: forbidden
+    when:
+      - field: accountType
+        in: [AccountType.BUSINESS, AccountType.FREELANCER]
+        then: required
+
+  # Compound condition (AND)
+  vatNumber:
+    state: forbidden
+    when:
+      - all:
+          - field: accountType
+            is: AccountType.BUSINESS
+          - context: config.region
+            in: [Country.DE, Country.AT, Country.CH]
+        then: required
+
+  # Cross-section reference
+  billingEmail:
+    state: optional
+    when:
+      - section: preferences
+        field: separateBilling
+        is: true
+        then: required
+
+  # Nested object with sub-fields
+  address:
+    state: optional
+    when:
+      - field: accountType
+        is: AccountType.BUSINESS
+        then: required
+    fields:
+      street:
+        state: required
+      city:
+        state: required
+      zip:
+        state: required
+      country:
+        state: required
+      state:
+        state: optional
+        when:
+          - field: address.country
+            in: [Country.US, Country.CA]
+            then: required

@@ -1,0 +1,35 @@
+openapi: 3.0.3
+info:
+  title: Order API
+  version: 0.1.0
+
+paths: {}
+
+components:
+  schemas:
+    OrderStatus:
+      type: string
+      enum:
+        - PENDING
+        - CONFIRMED
+        - SHIPPED
+        - DELIVERED
+
+    Priority:
+      type: string
+      enum:
+        - LOW
+        - MEDIUM
+        - HIGH
+
+    Order:
+      type: object
+      properties:
+        customerName:
+          type: string
+        status:
+          $ref: "#/components/schemas/OrderStatus"
+        priority:
+          $ref: "#/components/schemas/Priority"
+        notes:
+          type: string

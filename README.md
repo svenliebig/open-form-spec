@@ -1,0 +1,76 @@
+# Open Form Spec (OFS)
+
+A declarative specification for form field state rules. Defines whether fields are **required**, **optional**, or **forbidden** based on form values and external context.
+
+```yaml
+section: registration
+dto: Registration
+
+imports:
+  enums:
+    AccountType: "api#AccountType"
+
+fields:
+  email:
+    state: required
+  nickname:
+    state: optional
+  companyName:
+    state: forbidden
+    when:
+      - field: accountType
+        is: AccountType.BUSINESS
+        then: required
+```
+
+OFS sits between your OpenAPI spec and your application code. Where OpenAPI defines *what* your API looks like, OFS defines *when* each field should exist — in one place, consumed by both frontend and backend.
+
+## Documentation
+
+| Document | Description |
+|----------|-------------|
+| [Introduction](docs/01-introduction.md) | The problem, the two-layer solution, how it works |
+| [Spec Format](docs/02-spec-format.md) | YAML format reference: fields, states, conditions, enums, context |
+| [Architecture](docs/03-architecture.md) | Package overview, dependency graph, data flow |
+| [Configuration](docs/04-configuration.md) | `ofs.config.js` reference and CLI commands |
+| [Plugins](docs/05-plugins.md) | Plugin API, writing custom plugins |
+| [Plugin: Yup](docs/06-plugin-yup.md) | Yup generator: Layer 1 + Layer 2, react-hook-form integration |
+| [Resolver](docs/07-resolver.md) | Runtime field state evaluation |
+
+## Usage
+
+```typescript
+import { registrationSchema } from "./generated/ofs/registration.ofs";
+
+// Override only what you need — enum .oneOf(), types, and states are generated
+const schema = registrationSchema({
+  email: yup.string().email(),
+  password: yup.string().min(8),
+});
+// TypeScript infers: ObjectSchema<{ email: string, accountType: "PERSONAL" | "BUSINESS" | ..., ... }>
+```
+
+## Quick Start
+
+```bash
+npm install
+npm run build
+npm test
+```
+
+```bash
+# In your project
+npx ofs validate          # validate specs against OpenAPI
+npx ofs generate          # validate + run all plugins
+```
+
+## Packages
+
+| Package | Description |
+|---------|-------------|
+| `@ofs/types` | Type definitions (zero deps) |
+| `@ofs/core` | YAML parser + field state resolver |
+| `@ofs/validator` | Schema + enum validation against OpenAPI |
+| `@ofs/plugin` | Plugin API types + `defineConfig` |
+| `@ofs/runner` | CLI, config loading, plugin orchestration |
+| `@ofs/plugin-yup` | Generates type-preserving yup schemas with enum support and format-aware factories |
