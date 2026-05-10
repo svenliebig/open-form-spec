@@ -1,5 +1,13 @@
 # Configuration
 
+## Installation
+
+```bash
+npm install --save-dev @open-form-spec/runner @open-form-spec/plugin
+```
+
+`@open-form-spec/runner` provides the `ofs` CLI binary and brings `core`, `types`, and `validator` as dependencies. `@open-form-spec/plugin` provides `defineConfig` and the plugin API types for your config file.
+
 ## Config File
 
 OFS uses a JavaScript config file in your project root. The runner looks for `ofs.config.js` or `ofs.config.mjs` in the current working directory.

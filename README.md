@@ -61,13 +61,15 @@ const schema = registrationSchema({
 ## Quick Start
 
 ```bash
-npm install
-npm run build
-npm test
+# Install the CLI
+npm install --save-dev @open-form-spec/runner @open-form-spec/plugin
+
+# Add the yup plugin if needed
+npm install --save-dev @open-form-spec/plugin-yup
 ```
 
 ```bash
-# In your project
+# Run in your project
 npx ofs validate          # validate specs against OpenAPI
 npx ofs generate          # validate + run all plugins
 ```

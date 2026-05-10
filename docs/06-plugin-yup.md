@@ -2,6 +2,12 @@
 
 The yup plugin generates [yup](https://github.com/jquense/yup) validation schemas from OFS specs. It produces Layer 1 (field state) code that you combine with your hand-written Layer 2 (content validation). Types are fully preserved — including enum narrowing from `.oneOf()`.
 
+## Installation
+
+```bash
+npm install --save-dev @open-form-spec/runner @open-form-spec/plugin @open-form-spec/plugin-yup
+```
+
 ## Setup
 
 ```javascript
