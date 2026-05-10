@@ -1,0 +1,854 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Open Form Spec — One spec. Both sides in sync.</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --indigo-50:  #eef2ff;
+      --indigo-100: #e0e7ff;
+      --indigo-400: #818cf8;
+      --indigo-500: #6366f1;
+      --indigo-600: #4f46e5;
+      --indigo-700: #4338ca;
+      --slate-50:   #f8fafc;
+      --slate-100:  #f1f5f9;
+      --slate-200:  #e2e8f0;
+      --slate-300:  #cbd5e1;
+      --slate-400:  #94a3b8;
+      --slate-500:  #64748b;
+      --slate-600:  #475569;
+      --slate-700:  #334155;
+      --slate-800:  #1e293b;
+      --slate-900:  #0f172a;
+      --green-400:  #4ade80;
+      --amber-400:  #fbbf24;
+      --red-400:    #f87171;
+      --red-500:    #ef4444;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      color: var(--slate-800);
+      background: white;
+      line-height: 1.6;
+    }
+
+    /* ─── NAV ─────────────────────────────────── */
+    nav {
+      position: sticky; top: 0; z-index: 100;
+      background: rgba(15, 23, 42, 0.96);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+      height: 60px;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 2rem;
+    }
+    .nav-logo {
+      font-size: 0.95rem; font-weight: 700;
+      color: white; text-decoration: none;
+      display: flex; align-items: center; gap: 0.6rem;
+    }
+    .nav-logo-badge {
+      background: var(--indigo-600); color: white;
+      padding: 2px 9px; border-radius: 5px;
+      font-size: 0.72rem; font-weight: 800;
+      letter-spacing: 0.06em;
+    }
+    .nav-links { display: flex; gap: 1.75rem; list-style: none; }
+    .nav-links a {
+      color: var(--slate-400); text-decoration: none;
+      font-size: 0.875rem; font-weight: 500;
+      transition: color 0.15s;
+    }
+    .nav-links a:hover { color: white; }
+    @media (max-width: 600px) { .nav-links { display: none; } }
+
+    /* ─── HERO ────────────────────────────────── */
+    .hero {
+      background: var(--slate-900);
+      padding: 7rem 2rem 6rem;
+      text-align: center;
+      position: relative; overflow: hidden;
+    }
+    .hero::before {
+      content: '';
+      position: absolute; top: -30%; left: 50%;
+      transform: translateX(-50%);
+      width: 900px; height: 900px;
+      background: radial-gradient(circle, rgba(99,102,241,0.13) 0%, transparent 65%);
+      pointer-events: none;
+    }
+    .hero-inner {
+      position: relative; max-width: 780px; margin: 0 auto;
+    }
+    .hero-eyebrow {
+      display: inline-block;
+      font-size: 0.72rem; font-weight: 700;
+      letter-spacing: 0.12em; text-transform: uppercase;
+      color: var(--indigo-400); margin-bottom: 1.5rem;
+    }
+    .hero h1 {
+      font-size: clamp(2.4rem, 6vw, 4.25rem);
+      font-weight: 900; line-height: 1.1;
+      letter-spacing: -0.03em; color: white;
+      margin-bottom: 1.5rem;
+    }
+    .hero h1 em {
+      font-style: normal;
+      background: linear-gradient(120deg, var(--indigo-400) 0%, #a78bfa 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .hero-sub {
+      font-size: 1.15rem; color: var(--slate-400);
+      max-width: 560px; margin: 0 auto 2.5rem;
+      line-height: 1.75;
+    }
+    .hero-states {
+      display: flex; justify-content: center;
+      gap: 0.6rem; margin-bottom: 2.75rem; flex-wrap: wrap;
+    }
+    .state-pill {
+      padding: 4px 15px; border-radius: 100px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.78rem; font-weight: 500;
+    }
+    .state-required  { background: rgba(34,197,94,0.12);  color: var(--green-400);  border: 1px solid rgba(34,197,94,0.25); }
+    .state-optional  { background: rgba(251,191,36,0.12); color: var(--amber-400);  border: 1px solid rgba(251,191,36,0.25); }
+    .state-forbidden { background: rgba(239,68,68,0.12);  color: var(--red-400);    border: 1px solid rgba(239,68,68,0.25); }
+    .hero-ctas { display: flex; justify-content: center; gap: 0.875rem; flex-wrap: wrap; }
+    .btn-primary {
+      background: var(--indigo-600); color: white;
+      padding: 0.72rem 1.75rem; border-radius: 8px;
+      font-size: 0.9rem; font-weight: 600; text-decoration: none;
+      transition: background 0.15s, transform 0.15s;
+      display: inline-block;
+    }
+    .btn-primary:hover { background: var(--indigo-500); transform: translateY(-1px); }
+    .btn-ghost {
+      background: rgba(255,255,255,0.05); color: var(--slate-300);
+      padding: 0.72rem 1.75rem; border-radius: 8px;
+      font-size: 0.9rem; font-weight: 600; text-decoration: none;
+      border: 1px solid rgba(255,255,255,0.1);
+      transition: background 0.15s;
+      display: inline-block;
+    }
+    .btn-ghost:hover { background: rgba(255,255,255,0.09); }
+
+    /* ─── SECTION SHARED ──────────────────────── */
+    .section { padding: 5.5rem 2rem; }
+    .section-alt { background: var(--slate-50); }
+    .wrap  { max-width: 960px;  margin: 0 auto; }
+    .wrap-lg { max-width: 1100px; margin: 0 auto; }
+
+    .section-label {
+      font-size: 0.7rem; font-weight: 800;
+      letter-spacing: 0.12em; text-transform: uppercase;
+      color: var(--indigo-600); margin-bottom: 0.6rem;
+    }
+    .section-title {
+      font-size: clamp(1.6rem, 3.5vw, 2.4rem);
+      font-weight: 800; color: var(--slate-900);
+      letter-spacing: -0.025em; line-height: 1.2;
+      margin-bottom: 0.75rem;
+    }
+    .section-lead {
+      font-size: 1.05rem; color: var(--slate-500);
+      max-width: 580px; margin-bottom: 3rem;
+      line-height: 1.75;
+    }
+
+    /* ─── FADE-IN ─────────────────────────────── */
+    .reveal {
+      opacity: 0; transform: translateY(22px);
+      transition: opacity 0.55s ease, transform 0.55s ease;
+    }
+    .reveal.visible { opacity: 1; transform: translateY(0); }
+
+    /* ─── PROBLEM ─────────────────────────────── */
+    .rule-box {
+      background: white; border: 2px solid var(--slate-200);
+      border-radius: 10px; padding: 1rem 1.5rem;
+      text-align: center; font-family: 'JetBrains Mono', monospace;
+      font-size: 0.88rem; color: var(--slate-700);
+      margin-bottom: 1.25rem; display: inline-block;
+      width: 100%;
+    }
+    .rule-box strong { color: var(--slate-900); }
+    .rule-box .req { color: var(--green-400); font-weight: 600; }
+
+    .arrows-row {
+      display: grid; grid-template-columns: repeat(4, 1fr);
+      gap: 1rem; text-align: center;
+      color: var(--slate-300); font-size: 1.25rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .problem-grid {
+      display: grid; grid-template-columns: repeat(4, 1fr);
+      gap: 1rem; margin-bottom: 2rem;
+    }
+    @media (max-width: 780px) {
+      .problem-grid, .arrows-row { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 480px) {
+      .problem-grid, .arrows-row { grid-template-columns: 1fr; }
+    }
+
+    .problem-card {
+      background: white; border: 1.5px solid var(--slate-200);
+      border-radius: 12px; padding: 1.1rem 1rem;
+      position: relative;
+    }
+    .problem-card-label {
+      font-size: 0.7rem; font-weight: 700;
+      color: var(--slate-400); text-transform: uppercase;
+      letter-spacing: 0.07em; margin-bottom: 0.75rem;
+      display: flex; align-items: center; gap: 0.45rem;
+    }
+    .pulse-dot {
+      width: 7px; height: 7px; border-radius: 50%;
+      background: var(--red-500); display: inline-block;
+      animation: pulse 2.2s ease-in-out infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50%       { opacity: 0.3; }
+    }
+    .problem-card pre {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.7rem; color: var(--slate-500);
+      line-height: 1.65; white-space: pre-wrap;
+    }
+    .drift-tag {
+      position: absolute; top: -9px; right: 10px;
+      background: var(--red-500); color: white;
+      font-size: 0.58rem; font-weight: 700;
+      padding: 1px 7px; border-radius: 100px;
+      letter-spacing: 0.06em; text-transform: uppercase;
+    }
+
+    .failure-modes {
+      display: flex; gap: 1rem; flex-wrap: wrap;
+      justify-content: center; margin-top: 0.5rem;
+    }
+    .failure-pill {
+      background: rgba(239,68,68,0.08); color: #f87171;
+      border: 1px solid rgba(239,68,68,0.2);
+      padding: 6px 14px; border-radius: 100px;
+      font-size: 0.8rem; font-weight: 600;
+    }
+
+    /* ─── PIPELINE ────────────────────────────── */
+    .pipeline {
+      display: flex; align-items: stretch; gap: 0;
+      margin: 0 0 3rem;
+    }
+    .pipe-node {
+      flex: 1; min-width: 140px;
+      background: var(--slate-50); border: 1.5px solid var(--slate-200);
+      border-radius: 12px; padding: 1.5rem 1.25rem;
+      text-align: center;
+    }
+    .pipe-node.center {
+      background: var(--indigo-600); border-color: var(--indigo-700);
+      transform: scale(1.06);
+      box-shadow: 0 10px 28px rgba(79,70,229,0.32);
+      z-index: 1; position: relative;
+    }
+    .pipe-node-name {
+      font-size: 0.82rem; font-weight: 700;
+      color: var(--slate-700); margin-bottom: 0.5rem;
+    }
+    .pipe-node.center .pipe-node-name { color: white; }
+    .pipe-node-items {
+      font-size: 0.69rem; color: var(--slate-500);
+      line-height: 1.9; font-family: 'JetBrains Mono', monospace;
+    }
+    .pipe-node.center .pipe-node-items { color: rgba(255,255,255,0.65); }
+    .pipe-arrow {
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      padding: 0 0.5rem; flex-shrink: 0; gap: 3px;
+    }
+    .pipe-arrow-label {
+      font-size: 0.58rem; font-weight: 700;
+      color: var(--indigo-500); text-transform: uppercase;
+      letter-spacing: 0.07em;
+    }
+    .pipe-arrow-icon { color: var(--slate-300); font-size: 1.1rem; }
+    .pipe-right {
+      display: flex; flex-direction: column;
+      gap: 0.75rem; flex: 1; min-width: 140px;
+    }
+    .pipe-node-sm {
+      background: var(--slate-50); border: 1.5px solid var(--slate-200);
+      border-radius: 12px; padding: 1rem 1.1rem; flex: 1;
+    }
+    .pipe-node-sm-name {
+      font-size: 0.78rem; font-weight: 700;
+      color: var(--slate-700); margin-bottom: 0.2rem;
+    }
+    .pipe-node-sm-items {
+      font-size: 0.67rem; color: var(--slate-500);
+      line-height: 1.7; font-family: 'JetBrains Mono', monospace;
+    }
+    @media (max-width: 640px) {
+      .pipeline { flex-direction: column; }
+      .pipe-node.center { transform: none; }
+      .pipe-arrow { flex-direction: row; padding: 0.25rem 0; }
+      .pipe-arrow-icon { transform: rotate(90deg); }
+    }
+
+    /* ─── LAYERS ──────────────────────────────── */
+    .layers-grid {
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 1.5rem; margin-top: 3rem;
+    }
+    @media (max-width: 600px) { .layers-grid { grid-template-columns: 1fr; } }
+
+    .layer-card { border: 1.5px solid var(--slate-200); border-radius: 12px; overflow: hidden; }
+    .layer-head {
+      padding: 1rem 1.25rem;
+      display: flex; flex-direction: column; gap: 2px;
+    }
+    .layer-head-sub {
+      font-size: 0.62rem; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 0.1em;
+      opacity: 0.65;
+    }
+    .layer-head-title { font-size: 0.95rem; font-weight: 700; }
+    .layer-head-1 { background: var(--indigo-600); color: white; }
+    .layer-head-2 { background: var(--slate-800);  color: white; }
+    .layer-body { padding: 1.25rem; }
+    .layer-desc {
+      font-size: 0.85rem; color: var(--slate-600);
+      margin-bottom: 1rem; line-height: 1.65;
+    }
+
+    /* ─── CODE BLOCK ──────────────────────────── */
+    .code {
+      background: var(--slate-900); border-radius: 10px;
+      overflow: hidden; margin-top: 0.75rem;
+    }
+    .code-bar {
+      background: var(--slate-800);
+      padding: 0.55rem 1rem;
+      font-size: 0.72rem; font-weight: 600;
+      color: var(--slate-400);
+      display: flex; align-items: center; gap: 0.5rem;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+    }
+    .code-dot { width: 9px; height: 9px; border-radius: 50%; background: var(--slate-600); }
+    .code pre {
+      padding: 1.1rem 1.25rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.775rem; line-height: 1.75;
+      color: #cbd5e1; overflow-x: auto;
+      tab-size: 2;
+    }
+    /* syntax tokens */
+    .k  { color: #c4b5fd; } /* keyword  */
+    .s  { color: #86efac; } /* string   */
+    .v  { color: #fca5a5; } /* value    */
+    .fn { color: #fde68a; } /* function */
+    .t  { color: #67e8f9; } /* type     */
+    .n  { color: #fb923c; } /* number   */
+    .c  { color: #475569; } /* comment  */
+    .p  { color: #94a3b8; } /* property */
+
+    /* ─── QUICK START ─────────────────────────── */
+    .section-dark { background: var(--slate-900); }
+    .section-dark .section-label { color: var(--indigo-400); }
+    .section-dark .section-title { color: white; }
+    .section-dark .section-lead  { color: var(--slate-400); }
+
+    .qs-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.75rem; }
+    @media (max-width: 640px) { .qs-grid { grid-template-columns: 1fr; } }
+
+    .qs-step-label {
+      font-size: 0.7rem; font-weight: 700;
+      color: var(--slate-500); text-transform: uppercase;
+      letter-spacing: 0.08em; margin-bottom: 0.75rem;
+    }
+
+    /* ─── PACKAGES ────────────────────────────── */
+    .pkg-grid {
+      display: grid; grid-template-columns: repeat(3, 1fr);
+      gap: 1rem;
+    }
+    @media (max-width: 780px) { .pkg-grid { grid-template-columns: repeat(2, 1fr); } }
+    @media (max-width: 480px) { .pkg-grid { grid-template-columns: 1fr; } }
+
+    .pkg-card {
+      background: white; border: 1.5px solid var(--slate-200);
+      border-radius: 10px; padding: 1.1rem 1.25rem;
+    }
+    .pkg-name {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.78rem; font-weight: 600;
+      color: var(--indigo-600); background: var(--indigo-50);
+      padding: 2px 9px; border-radius: 4px;
+      display: inline-block; margin-bottom: 0.5rem;
+    }
+    .pkg-desc { font-size: 0.82rem; color: var(--slate-600); line-height: 1.55; }
+
+    /* ─── DOCS ────────────────────────────────── */
+    .docs-grid {
+      display: grid; grid-template-columns: repeat(3, 1fr);
+      gap: 1rem;
+    }
+    @media (max-width: 780px) { .docs-grid { grid-template-columns: repeat(2, 1fr); } }
+    @media (max-width: 480px) { .docs-grid { grid-template-columns: 1fr; } }
+
+    .doc-card {
+      border: 1.5px solid var(--slate-200); border-radius: 12px;
+      padding: 1.25rem; text-decoration: none; color: inherit;
+      display: block;
+      transition: border-color 0.15s, box-shadow 0.15s, transform 0.15s;
+    }
+    .doc-card:hover {
+      border-color: var(--indigo-400);
+      box-shadow: 0 4px 18px rgba(99,102,241,0.1);
+      transform: translateY(-2px);
+    }
+    .doc-card-title {
+      font-size: 0.9rem; font-weight: 700;
+      color: var(--slate-800); margin-bottom: 0.35rem;
+    }
+    .doc-card-desc { font-size: 0.78rem; color: var(--slate-500); line-height: 1.55; }
+    .doc-card-arrow {
+      font-size: 0.8rem; color: var(--indigo-400);
+      margin-top: 0.75rem; font-weight: 600;
+    }
+
+    /* ─── FOOTER ──────────────────────────────── */
+    footer {
+      background: var(--slate-900);
+      border-top: 1px solid var(--slate-800);
+      padding: 2.5rem 2rem;
+      text-align: center;
+      font-size: 0.82rem; color: var(--slate-600);
+    }
+    footer a { color: var(--slate-400); text-decoration: none; }
+    footer a:hover { color: white; }
+  </style>
+</head>
+<body>
+
+<!-- ─── NAV ──────────────────────────────────────── -->
+<nav>
+  <a href="#" class="nav-logo">
+    <span class="nav-logo-badge">OFS</span>
+    Open Form Spec
+  </a>
+  <ul class="nav-links">
+    <li><a href="#problem">Why</a></li>
+    <li><a href="#solution">How it works</a></li>
+    <li><a href="#quickstart">Get started</a></li>
+    <li><a href="#docs">Docs</a></li>
+    <li><a href="https://github.com/svenliebig/open-form-spec" target="_blank" rel="noopener">GitHub</a></li>
+  </ul>
+</nav>
+
+<!-- ─── HERO ──────────────────────────────────────── -->
+<section class="hero">
+  <div class="hero-inner">
+    <div class="hero-eyebrow">Open Form Spec</div>
+    <h1>One declaration.<br><em>Both sides in sync.</em></h1>
+    <p class="hero-sub">
+      OpenAPI defines what your API looks like.
+      OFS defines <em>when</em> each field should exist —
+      in one place, validated against your OpenAPI spec,
+      consumed by both frontend and backend.
+    </p>
+    <div class="hero-states">
+      <span class="state-pill state-required">required</span>
+      <span class="state-pill state-optional">optional</span>
+      <span class="state-pill state-forbidden">forbidden</span>
+    </div>
+    <div class="hero-ctas">
+      <a href="#quickstart" class="btn-primary">Get started</a>
+      <a href="https://github.com/svenliebig/open-form-spec" target="_blank" rel="noopener" class="btn-ghost">View on GitHub</a>
+    </div>
+  </div>
+</section>
+
+<!-- ─── PROBLEM ───────────────────────────────────── -->
+<section class="section section-alt" id="problem">
+  <div class="wrap">
+    <p class="section-label">The Problem</p>
+    <h2 class="section-title">The same rule, written four times</h2>
+    <p class="section-lead">
+      In any app with a frontend and backend, field state rules get duplicated
+      across every layer that needs to act on them. They start identical.
+      Then they drift.
+    </p>
+
+    <div class="reveal">
+      <div class="rule-box">
+        <strong>Business rule:</strong>&nbsp;
+        <code>companyName</code> is <span class="req">required</span>
+        when <code>accountType</code> is <code>BUSINESS</code>
+      </div>
+
+      <div class="arrows-row">
+        <div>&#8595;</div>
+        <div>&#8595;</div>
+        <div>&#8595;</div>
+        <div>&#8595;</div>
+      </div>
+
+      <div class="problem-grid">
+        <div class="problem-card">
+          <div class="drift-tag">can drift</div>
+          <div class="problem-card-label">
+            <span class="pulse-dot"></span>Yup Schema
+          </div>
+          <pre>companyName:
+  yup.string()
+  .when('accountType', {
+    is: 'BUSINESS',
+    then: s =>
+      s.required()
+  })</pre>
+        </div>
+        <div class="problem-card">
+          <div class="drift-tag">can drift</div>
+          <div class="problem-card-label">
+            <span class="pulse-dot"></span>Form Rendering
+          </div>
+          <pre>{accountType ===
+  'BUSINESS' &amp;&amp; (
+  &lt;Field
+    name="companyName"
+    required
+  /&gt;
+)}</pre>
+        </div>
+        <div class="problem-card">
+          <div class="drift-tag">can drift</div>
+          <div class="problem-card-label">
+            <span class="pulse-dot"></span>API Transformer
+          </div>
+          <pre>if (payload.type
+    !== 'BUSINESS') {
+  delete payload
+    .companyName;
+}</pre>
+        </div>
+        <div class="problem-card">
+          <div class="drift-tag">can drift</div>
+          <div class="problem-card-label">
+            <span class="pulse-dot"></span>Backend Validator
+          </div>
+          <pre>if (BUSINESS
+    .equals(type)) {
+  require(
+    companyName);
+}</pre>
+        </div>
+      </div>
+
+      <div class="failure-modes">
+        <span class="failure-pill">Ghost data in the database</span>
+        <span class="failure-pill">Inconsistent validation</span>
+        <span class="failure-pill">Downstream data corruption</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ─── SOLUTION ──────────────────────────────────── -->
+<section class="section" id="solution">
+  <div class="wrap">
+    <p class="section-label">The Solution</p>
+    <h2 class="section-title">Declare once. Generate everywhere.</h2>
+    <p class="section-lead">
+      OFS is the single source of truth for field states. Like OpenAPI
+      standardised API contracts, OFS standardises when fields exist —
+      validated at build time, generated for every layer.
+    </p>
+
+    <!-- Pipeline -->
+    <div class="pipeline reveal">
+      <div class="pipe-node">
+        <div class="pipe-node-name">OpenAPI Spec</div>
+        <div class="pipe-node-items">field types<br>enum values<br>DTO schemas</div>
+      </div>
+      <div class="pipe-arrow">
+        <span class="pipe-arrow-label">validates</span>
+        <span class="pipe-arrow-icon">&#8594;</span>
+      </div>
+      <div class="pipe-node center">
+        <div class="pipe-node-name">.ofs.yaml</div>
+        <div class="pipe-node-items">field states<br>when conditions<br>context rules</div>
+      </div>
+      <div class="pipe-arrow">
+        <span class="pipe-arrow-label">generates</span>
+        <span class="pipe-arrow-icon">&#8594;</span>
+      </div>
+      <div class="pipe-right">
+        <div class="pipe-node-sm">
+          <div class="pipe-node-sm-name">Frontend</div>
+          <div class="pipe-node-sm-items">yup schema &middot; form rendering &middot; transformer</div>
+        </div>
+        <div class="pipe-node-sm">
+          <div class="pipe-node-sm-name">Backend</div>
+          <div class="pipe-node-sm-items">validator classes &middot; test fixtures</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Two Layers -->
+    <p class="section-label">Two Layers</p>
+    <h3 style="font-size:1.35rem;font-weight:800;color:var(--slate-900);letter-spacing:-0.02em;margin-bottom:0.5rem;">
+      Field state vs. field content
+    </h3>
+    <p style="font-size:1rem;color:var(--slate-500);max-width:560px;line-height:1.7;">
+      OFS handles <em>whether</em> a field should exist.
+      Your code handles <em>what kind of value</em> is valid.
+      Layer 2 can always assume Layer 1 has already passed.
+    </p>
+
+    <div class="layers-grid reveal">
+      <div class="layer-card">
+        <div class="layer-head layer-head-1">
+          <span class="layer-head-sub">Layer 1 &middot; Generated by OFS</span>
+          <span class="layer-head-title">Field State</span>
+        </div>
+        <div class="layer-body">
+          <p class="layer-desc">
+            Declares whether each field is required, optional, or forbidden
+            based on form values and context. Written as YAML, generated as
+            platform-native code. Never written by hand.
+          </p>
+          <div class="code">
+            <div class="code-bar">
+              <div class="code-dot"></div>
+              registration.ofs.yaml
+            </div>
+            <pre><span class="p">fields</span>:
+  <span class="p">companyName</span>:
+    <span class="p">state</span>: <span class="v">forbidden</span>
+    <span class="p">when</span>:
+      - <span class="p">field</span>: <span class="s">accountType</span>
+        <span class="p">is</span>: <span class="s">AccountType.BUSINESS</span>
+        <span class="p">then</span>: <span class="v">required</span></pre>
+          </div>
+        </div>
+      </div>
+      <div class="layer-card">
+        <div class="layer-head layer-head-2">
+          <span class="layer-head-sub">Layer 2 &middot; Hand-written</span>
+          <span class="layer-head-title">Field Content</span>
+        </div>
+        <div class="layer-body">
+          <p class="layer-desc">
+            Value-level validation: email format, string length, date ranges,
+            cross-field comparisons. Uses generated Layer 1 as the base —
+            override only the fields that need extra rules.
+          </p>
+          <div class="code">
+            <div class="code-bar">
+              <div class="code-dot"></div>
+              registration.schema.ts
+            </div>
+            <pre><span class="k">import</span> { <span class="fn">registrationSchema</span> }
+  <span class="k">from</span> <span class="s">"./generated/registration.ofs"</span>;
+
+<span class="k">export const</span> <span class="fn">schema</span> =
+  <span class="fn">registrationSchema</span>({
+    <span class="p">email</span>:    yup.<span class="fn">string</span>().<span class="fn">email</span>(),
+    <span class="p">password</span>: yup.<span class="fn">string</span>().<span class="fn">min</span>(<span class="n">8</span>),
+  });</pre>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ─── QUICK START ────────────────────────────────── -->
+<section class="section section-dark" id="quickstart">
+  <div class="wrap">
+    <p class="section-label">Quick Start</p>
+    <h2 class="section-title">Up and running in minutes</h2>
+    <p class="section-lead">
+      Write a spec, point it at your OpenAPI file, add a plugin, run the generator.
+    </p>
+
+    <div class="qs-grid reveal">
+      <div>
+        <p class="qs-step-label">1 &mdash; Write a spec</p>
+        <div class="code">
+          <div class="code-bar">
+            <div class="code-dot"></div>
+            src/specs/registration.ofs.yaml
+          </div>
+          <pre><span class="p">section</span>: <span class="s">registration</span>
+<span class="p">dto</span>:     <span class="s">Registration</span>
+
+<span class="p">imports</span>:
+  <span class="p">enums</span>:
+    <span class="p">AccountType</span>: <span class="s">"api#AccountType"</span>
+
+<span class="p">fields</span>:
+  <span class="p">email</span>:
+    <span class="p">state</span>: <span class="v">required</span>
+  <span class="p">nickname</span>:
+    <span class="p">state</span>: <span class="v">optional</span>
+  <span class="p">companyName</span>:
+    <span class="p">state</span>: <span class="v">forbidden</span>
+    <span class="p">when</span>:
+      - <span class="p">field</span>: <span class="s">accountType</span>
+        <span class="p">is</span>:    <span class="s">AccountType.BUSINESS</span>
+        <span class="p">then</span>: <span class="v">required</span></pre>
+        </div>
+      </div>
+      <div>
+        <p class="qs-step-label">2 &mdash; Configure and generate</p>
+        <div class="code">
+          <div class="code-bar">
+            <div class="code-dot"></div>
+            ofs.config.js
+          </div>
+          <pre><span class="k">import</span> { <span class="fn">defineConfig</span> }   <span class="k">from</span> <span class="s">"@ofs/plugin"</span>;
+<span class="k">import</span> { <span class="fn">yupGenerator</span> } <span class="k">from</span> <span class="s">"@ofs/plugin-yup"</span>;
+
+<span class="k">export default</span> <span class="fn">defineConfig</span>({
+  <span class="p">specs</span>:   <span class="s">"src/specs/**/*.ofs.yaml"</span>,
+  <span class="p">openapi</span>: { <span class="p">api</span>: <span class="s">"openapi.yaml"</span> },
+  <span class="p">plugins</span>: [
+    <span class="fn">yupGenerator</span>({
+      <span class="p">output</span>: <span class="s">"src/generated/ofs"</span>,
+    }),
+  ],
+});</pre>
+        </div>
+        <div class="code" style="margin-top:1rem;">
+          <div class="code-bar">
+            <div class="code-dot"></div>
+            Terminal
+          </div>
+          <pre><span class="c"># Validate specs against OpenAPI</span>
+npx ofs validate
+
+<span class="c"># Validate + generate code</span>
+npx ofs generate</pre>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ─── PACKAGES ──────────────────────────────────── -->
+<section class="section section-alt" id="packages">
+  <div class="wrap">
+    <p class="section-label">Packages</p>
+    <h2 class="section-title">Modular by design</h2>
+    <p class="section-lead">Each package has one job. Use only what you need.</p>
+
+    <div class="pkg-grid reveal">
+      <div class="pkg-card">
+        <div class="pkg-name">@ofs/types</div>
+        <p class="pkg-desc">Type definitions for the OFS document model and OpenAPI types. Zero dependencies.</p>
+      </div>
+      <div class="pkg-card">
+        <div class="pkg-name">@ofs/core</div>
+        <p class="pkg-desc">YAML parser and field state resolver. The runtime heart of OFS.</p>
+      </div>
+      <div class="pkg-card">
+        <div class="pkg-name">@ofs/validator</div>
+        <p class="pkg-desc">Build-time validation against OpenAPI. Catches typos and renamed enum values at build time.</p>
+      </div>
+      <div class="pkg-card">
+        <div class="pkg-name">@ofs/plugin</div>
+        <p class="pkg-desc">Plugin API types and <code>defineConfig</code> helper. The only import plugin authors need.</p>
+      </div>
+      <div class="pkg-card">
+        <div class="pkg-name">@ofs/runner</div>
+        <p class="pkg-desc">CLI that loads config, validates specs, and orchestrates plugins.</p>
+      </div>
+      <div class="pkg-card">
+        <div class="pkg-name">@ofs/plugin-yup</div>
+        <p class="pkg-desc">Generates type-preserving yup schemas with enum support and format-aware factories.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ─── DOCS ──────────────────────────────────────── -->
+<section class="section" id="docs">
+  <div class="wrap">
+    <p class="section-label">Documentation</p>
+    <h2 class="section-title">Everything you need</h2>
+
+    <div class="docs-grid reveal">
+      <a href="../01-introduction.md" class="doc-card">
+        <div class="doc-card-title">Introduction</div>
+        <div class="doc-card-desc">The problem, the two-layer solution, how it all fits together</div>
+        <div class="doc-card-arrow">Read &rarr;</div>
+      </a>
+      <a href="../02-spec-format.md" class="doc-card">
+        <div class="doc-card-title">Spec Format</div>
+        <div class="doc-card-desc">YAML reference: fields, states, conditions, enums, context</div>
+        <div class="doc-card-arrow">Read &rarr;</div>
+      </a>
+      <a href="../03-architecture.md" class="doc-card">
+        <div class="doc-card-title">Architecture</div>
+        <div class="doc-card-desc">Package overview, dependency graph, data flow</div>
+        <div class="doc-card-arrow">Read &rarr;</div>
+      </a>
+      <a href="../04-configuration.md" class="doc-card">
+        <div class="doc-card-title">Configuration</div>
+        <div class="doc-card-desc">ofs.config.js reference and CLI commands</div>
+        <div class="doc-card-arrow">Read &rarr;</div>
+      </a>
+      <a href="../05-plugins.md" class="doc-card">
+        <div class="doc-card-title">Plugins</div>
+        <div class="doc-card-desc">Plugin API, writing and publishing custom plugins</div>
+        <div class="doc-card-arrow">Read &rarr;</div>
+      </a>
+      <a href="../06-plugin-yup.md" class="doc-card">
+        <div class="doc-card-title">Plugin: Yup</div>
+        <div class="doc-card-desc">Yup generator: Layer 1 + Layer 2, react-hook-form integration</div>
+        <div class="doc-card-arrow">Read &rarr;</div>
+      </a>
+      <a href="../07-resolver.md" class="doc-card">
+        <div class="doc-card-title">Resolver</div>
+        <div class="doc-card-desc">Runtime field state evaluation for testing and dynamic use</div>
+        <div class="doc-card-arrow">Read &rarr;</div>
+      </a>
+      <a href="../08-plugin-yup-messages.md" class="doc-card">
+        <div class="doc-card-title">Yup: Messages</div>
+        <div class="doc-card-desc">Custom validation messages per field type and state</div>
+        <div class="doc-card-arrow">Read &rarr;</div>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- ─── FOOTER ────────────────────────────────────── -->
+<footer>
+  <p>Open Form Spec &mdash; <a href="../">Documentation</a> &mdash; <a href="https://github.com/svenliebig/open-form-spec" target="_blank" rel="noopener">GitHub</a></p>
+</footer>
+
+<script>
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+  }, { threshold: 0.08 });
+  document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+</script>
+</body>
+</html>
