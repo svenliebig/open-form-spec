@@ -1,10 +1,23 @@
 {
   "name": "@ofs/types",
   "version": "0.1.0",
-  "private": true,
+  "description": "Shared TypeScript type definitions for Open Form Spec",
+  "license": "MIT",
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/svenliebig/open-form-spec.git",
+    "directory": "packages/types"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "build": "npm run clean && tsc",
     "clean": "rm -rf dist"

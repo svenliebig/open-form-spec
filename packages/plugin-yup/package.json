@@ -1,23 +1,36 @@
 {
   "name": "@ofs/plugin-yup",
   "version": "0.1.0",
-  "private": true,
+  "description": "Yup schema generator plugin for Open Form Spec",
+  "license": "MIT",
   "type": "module",
   "main": "dist/src/index.js",
   "types": "dist/src/index.d.ts",
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/svenliebig/open-form-spec.git",
+    "directory": "packages/plugin-yup"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "build": "npm run clean && tsc",
     "clean": "rm -rf dist",
     "test": "node --test dist/**/*.test.js"
   },
   "dependencies": {
-    "@ofs/types": "*",
-    "@ofs/plugin": "*"
+    "@ofs/plugin": "0.1.0",
+    "@ofs/types": "0.1.0"
   },
   "devDependencies": {
-    "typescript": "~5.8.0",
+    "@ofs/core": "0.1.0",
+    "@ofs/validator": "0.1.0",
     "@types/node": "^22.0.0",
-    "@ofs/core": "*",
-    "@ofs/validator": "*"
+    "typescript": "~5.8.0"
   }
 }

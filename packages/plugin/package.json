@@ -1,16 +1,29 @@
 {
   "name": "@ofs/plugin",
   "version": "0.1.0",
-  "private": true,
+  "description": "Plugin API types and defineConfig helper for Open Form Spec",
+  "license": "MIT",
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/svenliebig/open-form-spec.git",
+    "directory": "packages/plugin"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "build": "npm run clean && tsc",
     "clean": "rm -rf dist"
   },
   "dependencies": {
-    "@ofs/types": "*"
+    "@ofs/types": "0.1.0"
   },
   "devDependencies": {
     "typescript": "~5.8.0"
