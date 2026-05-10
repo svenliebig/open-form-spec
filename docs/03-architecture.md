@@ -4,7 +4,7 @@
 
 ```
 open-form-spec/
-├── schema.json                    # JSON Schema for .ofs.yaml intellisense
+├── schema.json                    # JSON Schema — source of truth; referenced by IDE modeline URL
 ├── examples/                      # Abstract fixtures for testing
 ├── docs/                          # This documentation
 └── packages/
@@ -15,6 +15,11 @@ open-form-spec/
     ├── runner/                    # @open-form-spec/runner
     └── plugin-yup/                # @open-form-spec/plugin-yup
 ```
+
+`schema.json` serves two purposes:
+
+- **IDE intellisense** — users point their `yaml-language-server` modeline at the versioned GitHub raw URL (see [Spec Format](./02-spec-format.md))
+- **Runtime validation** — the runner copies `schema.json` into the published `@open-form-spec/runner` package during build so it is always available on disk without a network call
 
 ## Packages
 

@@ -1,10 +1,14 @@
 # Spec Format
 
-OFS files use YAML with the `.ofs.yaml` extension. IDE intellisense is provided via a JSON Schema — add the modeline comment as the first line of your file:
+OFS files use YAML with the `.ofs.yaml` extension. IDE intellisense is provided via a JSON Schema.
+
+Add the modeline comment as the first line of your file, using the tag that matches your installed version:
 
 ```yaml
-# yaml-language-server: $schema=path/to/schema.json
+# yaml-language-server: $schema=https://raw.githubusercontent.com/svenliebig/open-form-spec/refs/tags/v0.1.0/schema.json
 ```
+
+The schema is fetched once by the editor and cached locally. Replace `v0.1.0` with your installed version.
 
 ## Document Structure
 

@@ -1,11 +1,11 @@
-import { resolve, dirname, relative } from "node:path";
-import { mkdirSync, writeFileSync } from "node:fs";
-import { execSync } from "node:child_process";
-import { fileURLToPath } from "node:url";
 import { parseOFS } from "@open-form-spec/core";
-import { validate, extractEnumsFromOpenAPI, extractSchemasFromOpenAPI } from "@open-form-spec/validator";
 import type { OFSConfig, OFSPlugin, OFSPluginContext } from "@open-form-spec/plugin";
 import type { OFSDocument, OpenAPISchemas } from "@open-form-spec/types";
+import { extractEnumsFromOpenAPI, extractSchemasFromOpenAPI, validate } from "@open-form-spec/validator";
+import { execSync } from "node:child_process";
+import { mkdirSync, writeFileSync } from "node:fs";
+import { dirname, relative, resolve } from "node:path";
+import { fileURLToPath } from "node:url";
 import { findSpecFiles } from "./files.js";
 
 export interface RunOptions {
@@ -176,9 +176,9 @@ function filterPlugins(plugins: OFSPlugin[], filter?: string): OFSPlugin[] {
 }
 
 function getSchemaPath(): string {
-  // packages/runner/dist/runner.js → ../../../schema.json
+  // dist/runner.js → ../schema.json (runner package root)
   const thisDir = dirname(fileURLToPath(import.meta.url));
-  return resolve(thisDir, "../../../schema.json");
+  return resolve(thisDir, "../schema.json");
 }
 
 function log(message: string): void {

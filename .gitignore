@@ -3,3 +3,6 @@ dist
 
 # Generated test result files
 *.testresult.ts
+
+# schema.json copied into runner package during build
+packages/runner/schema.json

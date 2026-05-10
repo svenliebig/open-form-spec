@@ -11,6 +11,7 @@
   },
   "files": [
     "dist",
+    "schema.json",
     "README.md"
   ],
   "repository": {
@@ -22,8 +23,8 @@
     "access": "public"
   },
   "scripts": {
-    "build": "npm run clean && tsc",
-    "clean": "rm -rf dist",
+    "build": "npm run clean && cp ../../schema.json . && tsc",
+    "clean": "rm -rf dist schema.json",
     "test": "node --test dist/**/*.test.js"
   },
   "dependencies": {
