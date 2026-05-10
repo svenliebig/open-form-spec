@@ -1,6 +1,6 @@
 {
   "name": "@open-form-spec/plugin",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Plugin API types and defineConfig helper for Open Form Spec",
   "license": "MIT",
   "type": "module",
@@ -23,7 +23,7 @@
     "clean": "rm -rf dist"
   },
   "dependencies": {
-    "@open-form-spec/types": "0.1.0"
+    "@open-form-spec/types": "0.2.0"
   },
   "devDependencies": {
     "typescript": "~5.8.0"
