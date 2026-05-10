@@ -1,9 +1,15 @@
 {
   "name": "open-form-spec",
   "private": true,
-  "workspaces": ["packages/*"],
+  "workspaces": [
+    "packages/*"
+  ],
   "scripts": {
     "build": "npm -w @open-form-spec/types run build && npm -w @open-form-spec/plugin run build && npm -w @open-form-spec/core run build && npm -w @open-form-spec/validator run build && npm -w @open-form-spec/runner run build && npm -w @open-form-spec/plugin-yup run build",
-    "test": "npm -w @open-form-spec/core run test && npm -w @open-form-spec/validator run test && npm -w @open-form-spec/runner run test && npm -w @open-form-spec/plugin-yup run test"
+    "test": "npm -w @open-form-spec/core run test && npm -w @open-form-spec/validator run test && npm -w @open-form-spec/runner run test && npm -w @open-form-spec/plugin-yup run test",
+    "release": "changeset publish"
+  },
+  "devDependencies": {
+    "@changesets/cli": "^2.31.0"
   }
 }
