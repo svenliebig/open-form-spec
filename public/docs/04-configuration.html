@@ -46,11 +46,10 @@
     <h1>Configuration</h1>
 
     <h2>Installation</h2>
-    <pre><code>npm install --save-dev @open-form-spec/runner @open-form-spec/plugin</code></pre>
+    <pre><code>npm install --save-dev @open-form-spec/runner @open-form-spec/plugin-yup</code></pre>
     <p>
-      <code>@open-form-spec/runner</code> provides the <code>ofs</code> CLI binary and brings
-      <code>core</code>, <code>types</code>, and <code>validator</code> as dependencies.
-      <code>@open-form-spec/plugin</code> provides <code>defineConfig</code> and the plugin API types for your config file.
+      <code>@open-form-spec/runner</code> provides the <code>ofs</code> CLI binary, <code>defineConfig</code>,
+      and brings <code>core</code>, <code>types</code>, and <code>validator</code> as dependencies.
     </p>
 
     <h2>Config File</h2>
@@ -60,7 +59,7 @@
     </p>
     <div class="code-wrap">
       <div class="code-label"><div class="code-dot"></div>ofs.config.js</div>
-      <pre><code>import { defineConfig } from "@open-form-spec/plugin";
+      <pre><code>import { defineConfig } from "@open-form-spec/runner";
 import { yupGenerator } from "@open-form-spec/plugin-yup";
 
 export default defineConfig({

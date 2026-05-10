@@ -104,7 +104,7 @@ function generateCode(spec, context) {
 ### Using in Config
 
 ```javascript
-import { defineConfig } from "@open-form-spec/plugin";
+import { defineConfig } from "@open-form-spec/runner";
 import { myPlugin } from "./my-plugin.js";
 
 export default defineConfig({

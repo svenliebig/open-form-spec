@@ -3,10 +3,10 @@
 ## Installation
 
 ```bash
-npm install --save-dev @open-form-spec/runner @open-form-spec/plugin
+npm install --save-dev @open-form-spec/runner @open-form-spec/plugin-yup
 ```
 
-`@open-form-spec/runner` provides the `ofs` CLI binary and brings `core`, `types`, and `validator` as dependencies. `@open-form-spec/plugin` provides `defineConfig` and the plugin API types for your config file.
+`@open-form-spec/runner` provides the `ofs` CLI binary, `defineConfig`, and brings `core`, `types`, and `validator` as dependencies.
 
 ## Config File
 
@@ -14,7 +14,7 @@ OFS uses a JavaScript config file in your project root. The runner looks for `of
 
 ```javascript
 // ofs.config.js
-import { defineConfig } from "@open-form-spec/plugin";
+import { defineConfig } from "@open-form-spec/runner";
 import { yupGenerator } from "@open-form-spec/plugin-yup";
 
 export default defineConfig({

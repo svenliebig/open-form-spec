@@ -5,14 +5,14 @@ The yup plugin generates [yup](https://github.com/jquense/yup) validation schema
 ## Installation
 
 ```bash
-npm install --save-dev @open-form-spec/runner @open-form-spec/plugin @open-form-spec/plugin-yup
+npm install --save-dev @open-form-spec/runner @open-form-spec/plugin-yup
 ```
 
 ## Setup
 
 ```javascript
 // ofs.config.js
-import { defineConfig } from "@open-form-spec/plugin";
+import { defineConfig } from "@open-form-spec/runner";
 import { yupGenerator } from "@open-form-spec/plugin-yup";
 
 export default defineConfig({
