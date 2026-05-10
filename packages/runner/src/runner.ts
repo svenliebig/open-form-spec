@@ -2,10 +2,10 @@ import { resolve, dirname, relative } from "node:path";
 import { mkdirSync, writeFileSync } from "node:fs";
 import { execSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
-import { parseOFS } from "@ofs/core";
-import { validate, extractEnumsFromOpenAPI, extractSchemasFromOpenAPI } from "@ofs/validator";
-import type { OFSConfig, OFSPlugin, OFSPluginContext } from "@ofs/plugin";
-import type { OFSDocument, OpenAPISchemas } from "@ofs/types";
+import { parseOFS } from "@open-form-spec/core";
+import { validate, extractEnumsFromOpenAPI, extractSchemasFromOpenAPI } from "@open-form-spec/validator";
+import type { OFSConfig, OFSPlugin, OFSPluginContext } from "@open-form-spec/plugin";
+import type { OFSDocument, OpenAPISchemas } from "@open-form-spec/types";
 import { findSpecFiles } from "./files.js";
 
 export interface RunOptions {

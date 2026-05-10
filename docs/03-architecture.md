@@ -8,23 +8,23 @@ open-form-spec/
 ├── examples/                      # Abstract fixtures for testing
 ├── docs/                          # This documentation
 └── packages/
-    ├── types/                     # @ofs/types
-    ├── core/                      # @ofs/core
-    ├── validator/                 # @ofs/validator
-    ├── plugin/                    # @ofs/plugin
-    ├── runner/                    # @ofs/runner
-    └── plugin-yup/                # @ofs/plugin-yup
+    ├── types/                     # @open-form-spec/types
+    ├── core/                      # @open-form-spec/core
+    ├── validator/                 # @open-form-spec/validator
+    ├── plugin/                    # @open-form-spec/plugin
+    ├── runner/                    # @open-form-spec/runner
+    └── plugin-yup/                # @open-form-spec/plugin-yup
 ```
 
 ## Packages
 
-### @ofs/types
+### @open-form-spec/types
 
 Zero-dependency type definitions for the OFS document model and OpenAPI types.
 
 Everything else depends on this package. It defines the shape of parsed `.ofs.yaml` documents (`OFSDocument`, `FieldDefinition`, `WhenEntry`, etc.) and OpenAPI property info (`OpenAPIPropertyInfo`, `OpenAPISchemas`).
 
-### @ofs/core
+### @open-form-spec/core
 
 Parser and resolver. The runtime heart of OFS.
 
@@ -33,7 +33,7 @@ Parser and resolver. The runtime heart of OFS.
 
 The resolver is the reference implementation of OFS condition evaluation. Plugins and generators should produce behavior consistent with it.
 
-### @ofs/validator
+### @open-form-spec/validator
 
 Build-time validation of OFS documents.
 
@@ -41,7 +41,7 @@ Build-time validation of OFS documents.
 - `extractEnumsFromOpenAPI(filePath)` — extracts enum definitions from an OpenAPI spec
 - `extractSchemasFromOpenAPI(filePath)` — extracts DTO property types from an OpenAPI spec
 
-### @ofs/plugin
+### @open-form-spec/plugin
 
 Plugin API types and configuration helper. This is what plugin authors and config files import.
 
@@ -51,7 +51,7 @@ Plugin API types and configuration helper. This is what plugin authors and confi
 - `OFSPluginFactory<T>` — type for plugin factory functions
 - `defineConfig(config)` — identity function for config file type inference
 
-### @ofs/runner
+### @open-form-spec/runner
 
 CLI that loads the config, parses specs, validates, and runs plugins.
 
@@ -64,7 +64,7 @@ npx ofs generate --config my.js    # custom config path
 
 The runner handles infrastructure (file discovery, OpenAPI loading, file writing). Plugins handle generation.
 
-### @ofs/plugin-yup
+### @open-form-spec/plugin-yup
 
 First-party plugin. Generates yup validation schemas from OFS specs.
 
@@ -78,16 +78,16 @@ Features: OpenAPI type-aware generation, format-specific type overrides (`string
 ## Dependency Graph
 
 ```
-@ofs/types          (no deps)
+@open-form-spec/types          (no deps)
     ▲
     │
-    ├── @ofs/core           (types, yaml)
-    ├── @ofs/plugin         (types)
-    ├── @ofs/validator      (types, ajv, yaml)
+    ├── @open-form-spec/core           (types, yaml)
+    ├── @open-form-spec/plugin         (types)
+    ├── @open-form-spec/validator      (types, ajv, yaml)
     │
     ▼
-@ofs/runner         (types, core, validator, plugin)
-@ofs/plugin-yup     (types, plugin)
+@open-form-spec/runner         (types, core, validator, plugin)
+@open-form-spec/plugin-yup     (types, plugin)
 ```
 
 ## Build Order
@@ -108,7 +108,7 @@ ofs.config.js
     ▼
 ┌─────────┐    ┌──────────────┐    ┌───────────┐
 │  Runner  │───►│  .ofs.yaml   │───►│  Parser   │──► OFSDocument[]
-│          │    │  files       │    │  (@ofs/core)│
+│          │    │  files       │    │  (@open-form-spec/core)│
 │          │    └──────────────┘    └───────────┘
 │          │
 │          │    ┌──────────────┐    ┌───────────┐

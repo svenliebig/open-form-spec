@@ -1,6 +1,6 @@
 import { readFileSync } from "node:fs";
 import { parse as parseYaml } from "yaml";
-import type { OpenAPIPropertyInfo, OpenAPISchemas } from "@ofs/types";
+import type { OpenAPIPropertyInfo, OpenAPISchemas } from "@open-form-spec/types";
 
 export interface OpenAPIEnums {
   [schemaName: string]: string[];

@@ -5,7 +5,7 @@ The resolver is the reference implementation for evaluating OFS field states. Gi
 ## Usage
 
 ```typescript
-import { parseOFS, resolveFieldStates } from "@ofs/core";
+import { parseOFS, resolveFieldStates } from "@open-form-spec/core";
 
 const spec = parseOFS("registration.ofs.yaml");
 

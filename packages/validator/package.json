@@ -1,23 +1,36 @@
 {
-  "name": "@ofs/validator",
+  "name": "@open-form-spec/validator",
   "version": "0.1.0",
-  "private": true,
+  "description": "OFS spec validation against JSON schema and OpenAPI",
+  "license": "MIT",
   "type": "module",
   "main": "dist/src/index.js",
   "types": "dist/src/index.d.ts",
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/svenliebig/open-form-spec.git",
+    "directory": "packages/validator"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "build": "npm run clean && tsc",
     "clean": "rm -rf dist",
     "test": "node --test dist/**/*.test.js"
   },
   "dependencies": {
-    "@ofs/types": "*",
+    "@open-form-spec/types": "0.1.0",
     "ajv": "^8.17.0",
     "yaml": "^2.7.0"
   },
   "devDependencies": {
-    "@ofs/core": "*",
-    "typescript": "~5.8.0",
-    "@types/node": "^22.0.0"
+    "@open-form-spec/core": "0.1.0",
+    "@types/node": "^22.0.0",
+    "typescript": "~5.8.0"
   }
 }

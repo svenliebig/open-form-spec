@@ -53,8 +53,8 @@ describe("checkout yup generation (end-to-end)", () => {
   });
 
   it("exports defaults and Fields type", () => {
-    assert.ok(code.includes("export const checkoutDefaults = {"));
-    assert.ok(code.includes("export type CheckoutFields = typeof checkoutDefaults;"));
+    assert.ok(code.includes("export const checkoutDefaults = () => ({"));
+    assert.ok(code.includes("export type CheckoutFields = ReturnType<typeof checkoutDefaults>;"));
   });
 
   it("exports generic checkoutSchema function", () => {
@@ -62,7 +62,7 @@ describe("checkout yup generation (end-to-end)", () => {
   });
 
   it("spreads defaults with overrides", () => {
-    assert.ok(code.includes("const fields = { ...checkoutDefaults, ...overrides };"));
+    assert.ok(code.includes("const fields = { ...checkoutDefaults(), ...overrides };"));
   });
 
   // --- Fields ---

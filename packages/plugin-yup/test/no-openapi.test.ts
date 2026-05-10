@@ -14,7 +14,7 @@ describe("yup generation without OpenAPI context", () => {
   });
 
   it("derives Fields type from defaults", () => {
-    assert.ok(code.includes("export type LoginFields = typeof loginDefaults;"));
+    assert.ok(code.includes("export type LoginFields = ReturnType<typeof loginDefaults>;"));
   });
 
   it("uses fields ref in shape", () => {

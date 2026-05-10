@@ -6,8 +6,8 @@ OFS uses a JavaScript config file in your project root. The runner looks for `of
 
 ```javascript
 // ofs.config.js
-import { defineConfig } from "@ofs/plugin";
-import { yupGenerator } from "@ofs/plugin-yup";
+import { defineConfig } from "@open-form-spec/plugin";
+import { yupGenerator } from "@open-form-spec/plugin-yup";
 
 export default defineConfig({
   specs: "src/specs/**/*.ofs.yaml",

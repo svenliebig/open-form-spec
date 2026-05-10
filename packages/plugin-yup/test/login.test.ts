@@ -13,11 +13,11 @@ describe("login yup generation", () => {
   });
 
   it("exports defaults object", () => {
-    assert.ok(code.includes("export const loginDefaults = {"));
+    assert.ok(code.includes("export const loginDefaults = () => ({"));
   });
 
   it("exports Fields type derived from defaults", () => {
-    assert.ok(code.includes("export type LoginFields = typeof loginDefaults;"));
+    assert.ok(code.includes("export type LoginFields = ReturnType<typeof loginDefaults>;"));
   });
 
   it("exports generic loginSchema function", () => {
@@ -25,7 +25,7 @@ describe("login yup generation", () => {
   });
 
   it("spreads defaults with overrides", () => {
-    assert.ok(code.includes("const fields = { ...loginDefaults, ...overrides };"));
+    assert.ok(code.includes("const fields = { ...loginDefaults(), ...overrides };"));
   });
 
   it("applies required state via fields reference", () => {

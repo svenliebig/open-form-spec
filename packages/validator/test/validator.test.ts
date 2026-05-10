@@ -2,7 +2,7 @@ import { describe, it } from "node:test";
 import assert from "node:assert/strict";
 import { resolve } from "node:path";
 import { fileURLToPath } from "node:url";
-import type { OFSDocument } from "@ofs/types";
+import type { OFSDocument } from "@open-form-spec/types";
 import { extractEnumsFromOpenAPI } from "../src/openapi.js";
 import { validate } from "../src/validator.js";
 

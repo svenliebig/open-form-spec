@@ -1,15 +1,15 @@
-import { parseOFS } from "@ofs/core";
+import { parseOFS } from "@open-form-spec/core";
 import type {
   OFSDocument,
   OpenAPIPropertyInfo,
   OpenAPISchemas,
-} from "@ofs/types";
-import type { OpenAPIEnums } from "@ofs/validator";
+} from "@open-form-spec/types";
+import type { OpenAPIEnums } from "@open-form-spec/validator";
 import {
   extractEnumsFromOpenAPI,
   extractSchemasFromOpenAPI,
   validate,
-} from "@ofs/validator";
+} from "@open-form-spec/validator";
 import { writeFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { fileURLToPath } from "node:url";

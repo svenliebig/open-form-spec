@@ -53,7 +53,7 @@ describe("order with enumImport", () => {
   });
 
   it("derives Fields type from defaults (includes oneOf narrowing)", () => {
-    assert.ok(code.includes("export type OrderFields = typeof orderDefaults;"));
+    assert.ok(code.includes("export type OrderFields = ReturnType<typeof orderDefaults>;"));
   });
 });
 

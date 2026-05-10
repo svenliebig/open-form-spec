@@ -1,12 +1,25 @@
 {
-  "name": "@ofs/runner",
+  "name": "@open-form-spec/runner",
   "version": "0.1.0",
-  "private": true,
+  "description": "CLI and programmatic runner for Open Form Spec code generation",
+  "license": "MIT",
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "bin": {
     "ofs": "dist/cli.js"
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/svenliebig/open-form-spec.git",
+    "directory": "packages/runner"
+  },
+  "publishConfig": {
+    "access": "public"
   },
   "scripts": {
     "build": "npm run clean && tsc",
@@ -14,13 +27,13 @@
     "test": "node --test dist/**/*.test.js"
   },
   "dependencies": {
-    "@ofs/types": "*",
-    "@ofs/core": "*",
-    "@ofs/validator": "*",
-    "@ofs/plugin": "*"
+    "@open-form-spec/core": "0.1.0",
+    "@open-form-spec/plugin": "0.1.0",
+    "@open-form-spec/types": "0.1.0",
+    "@open-form-spec/validator": "0.1.0"
   },
   "devDependencies": {
-    "typescript": "~5.8.0",
-    "@types/node": "^22.0.0"
+    "@types/node": "^22.0.0",
+    "typescript": "~5.8.0"
   }
 }

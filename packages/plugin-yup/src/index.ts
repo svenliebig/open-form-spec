@@ -1,6 +1,6 @@
 import { join } from "node:path";
-import type { OFSPlugin } from "@ofs/plugin";
-import type { OFSDocument, OpenAPIPropertyInfo, OpenAPISchemas } from "@ofs/types";
+import type { OFSPlugin } from "@open-form-spec/plugin";
+import type { OFSDocument, OpenAPIPropertyInfo, OpenAPISchemas } from "@open-form-spec/types";
 import { generateYupCode } from "./generator.js";
 
 export type { GeneratorContext, TypeOverride } from "./generator.js";
