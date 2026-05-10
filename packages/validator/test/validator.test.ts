@@ -26,6 +26,7 @@ describe("validator", () => {
       section: "test",
       dto: "Test",
       fields: {
+        other: { state: "required" },
         myField: {
           state: "optional",
           when: [
@@ -44,6 +45,7 @@ describe("validator", () => {
       dto: "Test",
       imports: { enums: { Status: "api#Status" } },
       fields: {
+        other: { state: "required" },
         myField: {
           state: "optional",
           when: [{ field: "other", is: "Status.ACTIVE", then: "required" }],
@@ -75,6 +77,7 @@ describe("validator", () => {
       dto: "Test",
       imports: { enums: { AccountType: "api#AccountType" } },
       fields: {
+        type: { state: "required" },
         myField: {
           state: "optional",
           when: [
@@ -103,6 +106,7 @@ describe("validator", () => {
       dto: "Test",
       imports: { enums: { AccountType: "api#AccountType" } },
       fields: {
+        type: { state: "required" },
         myField: {
           state: "optional",
           when: [
@@ -126,6 +130,7 @@ describe("validator", () => {
       dto: "Test",
       imports: { enums: { Country: "api#Country" } },
       fields: {
+        country: { state: "required" },
         myField: {
           state: "optional",
           when: [
@@ -168,6 +173,7 @@ describe("validator", () => {
       section: "test",
       dto: "Test",
       fields: {
+        other: { state: "required" },
         myField: {
           state: "optional",
           when: [{ field: "other", then: "required" }],
@@ -176,5 +182,40 @@ describe("validator", () => {
     };
     const errors = validate(doc, { schemaPath });
     assert.ok(errors.some((e) => e.message.includes("comparator")));
+  });
+
+  it("reports unknown field references with suggestion", () => {
+    const doc: OFSDocument = {
+      section: "test",
+      dto: "Test",
+      fields: {
+        enabled: { state: "required" },
+        detail: {
+          state: "forbidden",
+          when: [{ field: "enbled", is: true, then: "required" }],
+        },
+      },
+    };
+    const errors = validate(doc, { schemaPath });
+    assert.ok(errors.some((e) => e.message.includes("enbled")));
+    assert.ok(errors.some((e) => e.message.includes("does not exist")));
+    assert.ok(errors.some((e) => e.message.includes("Did you mean 'enabled'?")));
+  });
+
+  it("skips field reference validation for cross-section references", () => {
+    const doc: OFSDocument = {
+      section: "test",
+      dto: "Test",
+      fields: {
+        myField: {
+          state: "optional",
+          when: [
+            { section: "other", field: "nonExistent", is: true, then: "required" },
+          ],
+        },
+      },
+    };
+    const errors = validate(doc, { schemaPath });
+    assert.ok(!errors.some((e) => e.message.includes("does not exist")));
   });
 });

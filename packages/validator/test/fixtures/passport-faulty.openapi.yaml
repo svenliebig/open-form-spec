@@ -1,0 +1,16 @@
+openapi: 3.0.3
+info:
+  title: Passport API
+  version: 0.1.0
+
+paths: {}
+
+components:
+  schemas:
+    Passport:
+      type: object
+      properties:
+        hasPassport:
+          type: boolean
+        passportNumber:
+          type: string

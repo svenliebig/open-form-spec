@@ -31,6 +31,7 @@ export function validate(
   errors.push(...validateEnumImports(doc, options.openApiEnums));
   errors.push(...validateEnumReferences(doc, options.openApiEnums));
   errors.push(...validateConditionSources(doc));
+  errors.push(...validateFieldReferences(doc));
 
   return errors;
 }
@@ -223,4 +224,102 @@ function validateConditionSources(doc: OFSDocument): ValidationError[] {
 
   checkFields(doc.fields, "/fields");
   return errors;
+}
+
+function validateFieldReferences(doc: OFSDocument): ValidationError[] {
+  const errors: ValidationError[] = [];
+  const knownFields = collectFieldNames(doc.fields, "");
+
+  function checkCondition(cond: ConditionExpr, path: string): void {
+    if (!cond.field || cond.section) return;
+
+    if (!knownFields.has(cond.field)) {
+      const sorted = Array.from(knownFields).sort();
+      const suggestion = closestMatch(cond.field, sorted);
+      let message = `Field '${cond.field}' does not exist in section '${doc.section}'. Available fields: ${sorted.join(", ")}.`;
+      if (suggestion) {
+        message += ` Did you mean '${suggestion}'?`;
+      }
+      errors.push({ path: `${path}/field`, message });
+    }
+  }
+
+  function checkWhen(entry: WhenEntry, path: string): void {
+    if (isCompoundWhen(entry)) {
+      entry.all.forEach((cond, i) => checkCondition(cond, `${path}/all/${i}`));
+    } else {
+      checkCondition(entry, path);
+    }
+  }
+
+  function checkFieldDefs(
+    fields: Record<string, FieldDefinition>,
+    basePath: string,
+  ): void {
+    for (const [name, field] of Object.entries(fields)) {
+      const fieldPath = `${basePath}/${name}`;
+      if (field.when) {
+        field.when.forEach((w, i) => checkWhen(w, `${fieldPath}/when/${i}`));
+      }
+      if (field.fields) {
+        checkFieldDefs(field.fields, fieldPath);
+      }
+    }
+  }
+
+  checkFieldDefs(doc.fields, "/fields");
+  return errors;
+}
+
+function collectFieldNames(
+  fields: Record<string, FieldDefinition>,
+  prefix: string,
+): Set<string> {
+  const names = new Set<string>();
+  for (const [name, field] of Object.entries(fields)) {
+    const fullName = prefix ? `${prefix}.${name}` : name;
+    names.add(fullName);
+    if (field.fields) {
+      for (const nested of collectFieldNames(field.fields, fullName)) {
+        names.add(nested);
+      }
+    }
+  }
+  return names;
+}
+
+function levenshtein(a: string, b: string): number {
+  const m = a.length;
+  const n = b.length;
+  const dp: number[][] = Array.from({ length: m + 1 }, () =>
+    Array(n + 1).fill(0),
+  );
+  for (let i = 0; i <= m; i++) dp[i][0] = i;
+  for (let j = 0; j <= n; j++) dp[0][j] = j;
+  for (let i = 1; i <= m; i++) {
+    for (let j = 1; j <= n; j++) {
+      dp[i][j] =
+        a[i - 1] === b[j - 1]
+          ? dp[i - 1][j - 1]
+          : 1 + Math.min(dp[i - 1][j], dp[i][j - 1], dp[i - 1][j - 1]);
+    }
+  }
+  return dp[m][n];
+}
+
+function closestMatch(input: string, candidates: string[]): string | undefined {
+  let best: string | undefined;
+  let bestDist = Infinity;
+  for (const candidate of candidates) {
+    const dist = levenshtein(input.toLowerCase(), candidate.toLowerCase());
+    if (dist < bestDist) {
+      bestDist = dist;
+      best = candidate;
+    }
+  }
+  const maxLen = Math.max(input.length, best?.length ?? 0);
+  if (best && bestDist <= Math.ceil(maxLen * 0.4)) {
+    return best;
+  }
+  return undefined;
 }

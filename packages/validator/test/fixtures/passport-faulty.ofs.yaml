@@ -1,0 +1,13 @@
+# yaml-language-server: $schema=../../../../schema.json
+section: passport
+dto: Passport
+
+fields:
+  hasPassport:
+    state: required
+  passportNumber:
+    state: forbidden
+    when:
+      - field: hasPassports
+        is: true
+        then: required
