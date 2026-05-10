@@ -23,6 +23,14 @@ fields:
         then: required
 ```
 
+## Why
+
+OpenAPI solved a real problem: API contracts were duplicated across teams, drifted apart, and caused subtle bugs. OFS solves the same problem one layer deeper.
+
+In any application with a frontend and backend, field state rules — *"companyName is required when accountType is BUSINESS"* — get written four times: the validation schema, the form rendering logic, the API transformer, and the backend validator. When they drift, fields get silently accepted or rejected in the wrong places, old values persist in the database for hidden fields, and invalid data propagates downstream.
+
+OFS is the single source of truth for field states. Declare the rules once in YAML, validated against your OpenAPI spec, and generate consistent code for every layer.
+
 OFS sits between your OpenAPI spec and your application code. Where OpenAPI defines *what* your API looks like, OFS defines *when* each field should exist — in one place, consumed by both frontend and backend.
 
 ## Documentation
