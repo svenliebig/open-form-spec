@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Configuration — Open Form Spec</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../doc.css">
+</head>
+<body>
+
+<nav>
+  <a href="../" class="nav-logo">
+    <span class="nav-logo-badge">OFS</span>
+    Open Form Spec
+  </a>
+  <ul class="nav-links">
+    <li><a href="../#problem">Why</a></li>
+    <li><a href="../#solution">How it works</a></li>
+    <li><a href="../#quickstart">Get started</a></li>
+    <li><a href="../#docs">Docs</a></li>
+    <li><a href="https://github.com/svenliebig/open-form-spec" target="_blank" rel="noopener">GitHub</a></li>
+  </ul>
+</nav>
+
+<div class="doc-layout">
+  <aside class="doc-sidebar">
+    <a href="../" class="sidebar-home">
+      <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M10 13L5 8l5-5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      Back to home
+    </a>
+    <div class="sidebar-title">Documentation</div>
+    <a href="01-introduction.html" class="sidebar-link">Introduction</a>
+    <a href="02-spec-format.html" class="sidebar-link">Spec Format</a>
+    <a href="03-architecture.html" class="sidebar-link">Architecture</a>
+    <a href="04-configuration.html" class="sidebar-link active">Configuration</a>
+    <a href="05-plugins.html" class="sidebar-link">Plugins</a>
+    <a href="06-plugin-yup.html" class="sidebar-link">Plugin: Yup</a>
+    <a href="07-resolver.html" class="sidebar-link">Resolver</a>
+    <a href="08-plugin-yup-messages.html" class="sidebar-link">Yup: Messages</a>
+  </aside>
+
+  <main class="doc-content">
+    <h1>Configuration</h1>
+
+    <h2>Installation</h2>
+    <pre><code>npm install --save-dev @open-form-spec/runner @open-form-spec/plugin</code></pre>
+    <p>
+      <code>@open-form-spec/runner</code> provides the <code>ofs</code> CLI binary and brings
+      <code>core</code>, <code>types</code>, and <code>validator</code> as dependencies.
+      <code>@open-form-spec/plugin</code> provides <code>defineConfig</code> and the plugin API types for your config file.
+    </p>
+
+    <h2>Config File</h2>
+    <p>
+      OFS uses a JavaScript config file in your project root. The runner looks for
+      <code>ofs.config.js</code> or <code>ofs.config.mjs</code> in the current working directory.
+    </p>
+    <div class="code-wrap">
+      <div class="code-label"><div class="code-dot"></div>ofs.config.js</div>
+      <pre><code>import { defineConfig } from "@open-form-spec/plugin";
+import { yupGenerator } from "@open-form-spec/plugin-yup";
+
+export default defineConfig({
+  specs: "src/specs/**/*.ofs.yaml",
+  openapi: {
+    backend: "src/openapi/merged.yaml",
+  },
+  plugins: [
+    yupGenerator({
+      output: "src/generated/ofs",
+    }),
+  ],
+});</code></pre>
+    </div>
+
+    <h2>Options</h2>
+
+    <h3><code>specs</code></h3>
+    <p><strong>Required.</strong> Glob pattern for <code>.ofs.yaml</code> files.</p>
+    <pre><code>specs: "src/main/resources/open-form-spec/**/*.ofs.yaml"</code></pre>
+    <p>The runner scans the base directory recursively for files ending in <code>.ofs.yaml</code>.</p>
+
+    <h3><code>openapi</code></h3>
+    <p><strong>Optional.</strong> Map of source names to OpenAPI spec file paths.</p>
+    <pre><code>openapi: {
+  backend: "src/main/resources/openapi/v1/merged.yaml",
+  cms: "../cms/openapi.yaml",
+}</code></pre>
+    <p>
+      The keys match the import prefixes in your <code>.ofs.yaml</code> files. If your OFS spec says
+      <code>AccountType: "backend#AccountType"</code>, the <code>backend</code> key must be present here.
+    </p>
+    <p>Each OpenAPI spec is parsed for:</p>
+    <ul>
+      <li><strong>Enum definitions</strong> — validated against enum references in conditions</li>
+      <li><strong>Schema properties</strong> — field type info available to plugins for code generation</li>
+    </ul>
+
+    <h3><code>plugins</code></h3>
+    <p><strong>Optional.</strong> Array of plugins to run, in order.</p>
+    <pre><code>plugins: [
+  yupGenerator({ output: "src/generated/ofs" }),
+  javaTestGenerator({ output: "src/test/java/generated" }),
+]</code></pre>
+    <p>
+      Plugins are called sequentially after validation passes.
+      Each plugin receives all parsed specs and OpenAPI data.
+    </p>
+
+    <h3><code>hooks</code></h3>
+    <p><strong>Optional.</strong> Lifecycle hooks for running commands at specific points during generation.</p>
+    <pre><code>hooks: {
+  afterAllFilesWrite: "npm exec eslint -- --fix --max-warnings 0 src/generated/ofs",
+}</code></pre>
+    <p>Accepts a single command string or an array of commands executed sequentially:</p>
+    <pre><code>hooks: {
+  afterAllFilesWrite: [
+    "npm exec eslint -- --fix --max-warnings 0 src/generated/ofs",
+    "npm exec prettier -- --write src/generated/ofs",
+  ],
+}</code></pre>
+    <p>
+      Hooks only run when generation succeeds (no plugin errors).
+      Commands are executed with the config file directory as working directory.
+    </p>
+
+    <h2>Commands</h2>
+    <pre><code># Run from the directory containing ofs.config.js
+npx ofs validate                    # validate specs only
+npx ofs generate                    # validate + run all plugins
+npx ofs generate --plugin yup       # run only a specific plugin
+npx ofs generate --config path.js   # use a specific config file</code></pre>
+  </main>
+</div>
+
+<footer>
+  <p>Open Form Spec &mdash; <a href="../">Home</a> &mdash; <a href="https://github.com/svenliebig/open-form-spec" target="_blank" rel="noopener">GitHub</a></p>
+</footer>
+
+</body>
+</html>

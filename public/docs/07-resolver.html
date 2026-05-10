@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Resolver — Open Form Spec</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../doc.css">
+</head>
+<body>
+
+<nav>
+  <a href="../" class="nav-logo">
+    <span class="nav-logo-badge">OFS</span>
+    Open Form Spec
+  </a>
+  <ul class="nav-links">
+    <li><a href="../#problem">Why</a></li>
+    <li><a href="../#solution">How it works</a></li>
+    <li><a href="../#quickstart">Get started</a></li>
+    <li><a href="../#docs">Docs</a></li>
+    <li><a href="https://github.com/svenliebig/open-form-spec" target="_blank" rel="noopener">GitHub</a></li>
+  </ul>
+</nav>
+
+<div class="doc-layout">
+  <aside class="doc-sidebar">
+    <a href="../" class="sidebar-home">
+      <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M10 13L5 8l5-5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      Back to home
+    </a>
+    <div class="sidebar-title">Documentation</div>
+    <a href="01-introduction.html" class="sidebar-link">Introduction</a>
+    <a href="02-spec-format.html" class="sidebar-link">Spec Format</a>
+    <a href="03-architecture.html" class="sidebar-link">Architecture</a>
+    <a href="04-configuration.html" class="sidebar-link">Configuration</a>
+    <a href="05-plugins.html" class="sidebar-link">Plugins</a>
+    <a href="06-plugin-yup.html" class="sidebar-link">Plugin: Yup</a>
+    <a href="07-resolver.html" class="sidebar-link active">Resolver</a>
+    <a href="08-plugin-yup-messages.html" class="sidebar-link">Yup: Messages</a>
+  </aside>
+
+  <main class="doc-content">
+    <h1>Resolver</h1>
+    <p>
+      The resolver is the reference implementation for evaluating OFS field states.
+      Given an OFS document, form values, and context, it returns the resolved state of every field.
+    </p>
+
+    <h2>Usage</h2>
+    <pre><code>import { parseOFS, resolveFieldStates } from "@open-form-spec/core";
+
+const spec = parseOFS("registration.ofs.yaml");
+
+const states = resolveFieldStates(spec, {
+  values: { accountType: "BUSINESS" },
+  context: { config: { region: "DE" } },
+});
+
+// states.email === "required"
+// states.companyName === "required"
+// states.vatNumber === "required"
+// states.nickname === "optional"
+// states.taxId === "required"</code></pre>
+
+    <h2>Input</h2>
+    <pre><code>interface ResolveInput {
+  /** Field values for this section. */
+  values: Record&lt;string, unknown&gt;;
+
+  /** External context data (matches the spec's context definitions). */
+  context?: Record&lt;string, unknown&gt;;
+
+  /** Field values from other sections, for cross-section conditions. */
+  crossSections?: Record&lt;string, Record&lt;string, unknown&gt;&gt;;
+}</code></pre>
+
+    <h2>Output</h2>
+    <p>A flat map from field path to resolved state:</p>
+    <pre><code>type ResolvedFieldStates = Record&lt;string, FieldState&gt;;
+// { "email": "required", "address": "required", "address.street": "required", ... }</code></pre>
+    <p>
+      Nested fields are flattened with dot notation.
+      Both the parent object and its sub-fields get their own entries.
+    </p>
+
+    <h2>Evaluation Rules</h2>
+    <ol>
+      <li>For each field, <code>when</code> entries are checked in order</li>
+      <li>The first matching condition determines the state</li>
+      <li>If no condition matches, the base <code>state</code> applies</li>
+      <li>Enum references (e.g. <code>AccountType.BUSINESS</code>) are resolved to bare values (<code>"BUSINESS"</code>) before comparison</li>
+    </ol>
+
+    <h2>Use Cases</h2>
+    <p>The resolver is useful for:</p>
+    <ul>
+      <li><strong>Testing</strong> — verify that your OFS spec produces expected states for given inputs</li>
+      <li><strong>Runtime resolution</strong> — evaluate field states dynamically in your application</li>
+      <li><strong>Plugin development</strong> — ensure generated code matches the resolver's behavior</li>
+      <li><strong>Contract testing</strong> — compare frontend and backend validation against the resolver as ground truth</li>
+    </ul>
+  </main>
+</div>
+
+<footer>
+  <p>Open Form Spec &mdash; <a href="../">Home</a> &mdash; <a href="https://github.com/svenliebig/open-form-spec" target="_blank" rel="noopener">GitHub</a></p>
+</footer>
+
+</body>
+</html>

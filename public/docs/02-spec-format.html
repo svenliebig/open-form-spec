@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Spec Format — Open Form Spec</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../doc.css">
+</head>
+<body>
+
+<nav>
+  <a href="../" class="nav-logo">
+    <span class="nav-logo-badge">OFS</span>
+    Open Form Spec
+  </a>
+  <ul class="nav-links">
+    <li><a href="../#problem">Why</a></li>
+    <li><a href="../#solution">How it works</a></li>
+    <li><a href="../#quickstart">Get started</a></li>
+    <li><a href="../#docs">Docs</a></li>
+    <li><a href="https://github.com/svenliebig/open-form-spec" target="_blank" rel="noopener">GitHub</a></li>
+  </ul>
+</nav>
+
+<div class="doc-layout">
+  <aside class="doc-sidebar">
+    <a href="../" class="sidebar-home">
+      <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M10 13L5 8l5-5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      Back to home
+    </a>
+    <div class="sidebar-title">Documentation</div>
+    <a href="01-introduction.html" class="sidebar-link">Introduction</a>
+    <a href="02-spec-format.html" class="sidebar-link active">Spec Format</a>
+    <a href="03-architecture.html" class="sidebar-link">Architecture</a>
+    <a href="04-configuration.html" class="sidebar-link">Configuration</a>
+    <a href="05-plugins.html" class="sidebar-link">Plugins</a>
+    <a href="06-plugin-yup.html" class="sidebar-link">Plugin: Yup</a>
+    <a href="07-resolver.html" class="sidebar-link">Resolver</a>
+    <a href="08-plugin-yup-messages.html" class="sidebar-link">Yup: Messages</a>
+  </aside>
+
+  <main class="doc-content">
+    <h1>Spec Format</h1>
+    <p>
+      OFS files use YAML with the <code>.ofs.yaml</code> extension. IDE intellisense is provided via a JSON Schema —
+      add the modeline comment as the first line of your file:
+    </p>
+    <pre><code># yaml-language-server: $schema=path/to/schema.json</code></pre>
+
+    <h2>Document Structure</h2>
+    <pre><code>section: registration           # Section identifier
+dto: Registration               # OpenAPI DTO schema name
+
+imports:                        # Enum references
+  enums:
+    AccountType: "api#AccountType"
+
+context:                        # External data definitions
+  config:
+    type: object
+    properties:
+      requirePhone:
+        type: boolean
+
+fields:                         # Field state rules
+  email:
+    state: required</code></pre>
+
+    <h3>Required Properties</h3>
+    <table>
+      <thead><tr><th>Property</th><th>Description</th></tr></thead>
+      <tbody>
+        <tr><td><code>section</code></td><td>Identifier for this form section. Used as the function name in generated code.</td></tr>
+        <tr><td><code>dto</code></td><td>Name of the OpenAPI schema this section maps to. Used for type and enum lookups.</td></tr>
+        <tr><td><code>fields</code></td><td>Map of field names to their state definitions.</td></tr>
+      </tbody>
+    </table>
+
+    <h3>Optional Properties</h3>
+    <table>
+      <thead><tr><th>Property</th><th>Description</th></tr></thead>
+      <tbody>
+        <tr><td><code>imports</code></td><td>Enum references to OpenAPI schemas. Validated at build time.</td></tr>
+        <tr><td><code>context</code></td><td>Typed definitions for external data used in conditions.</td></tr>
+      </tbody>
+    </table>
+
+    <h2>Fields</h2>
+    <p>Each field has a base <code>state</code> and optional <code>when</code> conditions:</p>
+    <pre><code>fields:
+  email:
+    state: required              # always required
+
+  phone:
+    state: optional              # optional by default
+    when:
+      - context: config.requirePhone
+        is: true
+        then: required           # becomes required when context says so
+
+  companyName:
+    state: forbidden             # hidden by default
+    when:
+      - field: accountType
+        is: AccountType.BUSINESS
+        then: required           # shown and required for business accounts</code></pre>
+
+    <h3>Field States</h3>
+    <table>
+      <thead><tr><th>State</th><th>Meaning</th><th>Frontend behavior</th><th>Backend behavior</th></tr></thead>
+      <tbody>
+        <tr><td><code>required</code></td><td>Must have a value</td><td>Field visible, validation enforced</td><td>Reject if missing</td></tr>
+        <tr><td><code>optional</code></td><td>May have a value</td><td>Field visible, no validation</td><td>Accept if present</td></tr>
+        <tr><td><code>forbidden</code></td><td>Must not have a value</td><td>Field hidden, value cleared</td><td>Reject if present</td></tr>
+      </tbody>
+    </table>
+
+    <h3>Nested Fields</h3>
+    <p>Object-typed fields can define sub-fields:</p>
+    <pre><code>fields:
+  address:
+    state: optional
+    when:
+      - field: accountType
+        is: AccountType.BUSINESS
+        then: required
+    fields:
+      street:
+        state: required
+      city:
+        state: required
+      country:
+        state: required</code></pre>
+    <p>When the parent object is <code>forbidden</code>, all sub-fields are also forbidden.</p>
+
+    <h2>Conditions</h2>
+
+    <h3>Simple Condition</h3>
+    <p>A single source and comparator:</p>
+    <pre><code>when:
+  - field: accountType
+    is: AccountType.BUSINESS
+    then: required</code></pre>
+
+    <h3>Condition Sources</h3>
+    <table>
+      <thead><tr><th>Source</th><th>Syntax</th><th>Description</th></tr></thead>
+      <tbody>
+        <tr><td>Same-section field</td><td><code>field: fieldName</code></td><td>Value of another field in this section</td></tr>
+        <tr><td>Context</td><td><code>context: path.to.value</code></td><td>External data passed at validation time</td></tr>
+        <tr><td>Cross-section field</td><td><code>section: otherSection</code> + <code>field: fieldName</code></td><td>Field in a different section</td></tr>
+      </tbody>
+    </table>
+
+    <h3>Comparators</h3>
+    <table>
+      <thead><tr><th>Comparator</th><th>Description</th><th>Example</th></tr></thead>
+      <tbody>
+        <tr><td><code>is</code></td><td>Strictly equal</td><td><code>is: AccountType.BUSINESS</code></td></tr>
+        <tr><td><code>isNot</code></td><td>Not strictly equal</td><td><code>isNot: AccountType.PERSONAL</code></td></tr>
+        <tr><td><code>in</code></td><td>One of the listed values</td><td><code>in: [Country.DE, Country.AT]</code></td></tr>
+        <tr><td><code>notIn</code></td><td>None of the listed values</td><td><code>notIn: [Status.CLOSED]</code></td></tr>
+      </tbody>
+    </table>
+
+    <h3>Compound Conditions (AND)</h3>
+    <p>Multiple conditions that must all match:</p>
+    <pre><code>when:
+  - all:
+      - context: config.region
+        in: [Country.DE, Country.AT, Country.CH]
+      - field: accountType
+        is: AccountType.BUSINESS
+    then: required</code></pre>
+
+    <h3>Evaluation Order</h3>
+    <p>
+      <code>when</code> entries are evaluated top-to-bottom. <strong>First match wins.</strong>
+      If no condition matches, the base <code>state</code> applies.
+    </p>
+    <pre><code>myField:
+  state: forbidden
+  when:
+    - context: config.mode
+      is: "advanced"
+      then: required          # checked first
+    - field: showExtras
+      is: true
+      then: optional          # checked second
+    # if neither matches → forbidden (base state)</code></pre>
+
+    <h2>Enum Imports</h2>
+    <p>Enum values in conditions reference their OpenAPI definition:</p>
+    <pre><code>imports:
+  enums:
+    AccountType: "api#AccountType"     # source#SchemaName
+    Country: "api#Country"
+
+fields:
+  companyName:
+    state: forbidden
+    when:
+      - field: accountType
+        is: AccountType.BUSINESS       # validated against OpenAPI
+        then: required</code></pre>
+    <p>
+      The format is <code>source#SchemaName</code> where <code>source</code> matches
+      the key in your <code>ofs.config.js</code> openapi mapping.
+    </p>
+    <p>The validator checks:</p>
+    <ol>
+      <li>The enum schema exists in the OpenAPI spec (<code>AccountType</code>)</li>
+      <li>The enum value exists in that schema (<code>BUSINESS</code>)</li>
+    </ol>
+    <p>Typos and renamed values are caught at build time.</p>
+
+    <h2>Context</h2>
+    <p>
+      Context defines external data available during validation that is not part of the form section:
+    </p>
+    <pre><code>context:
+  config:
+    type: object
+    properties:
+      requirePhone:
+        type: boolean
+      region:
+        enum: Country</code></pre>
+    <p>
+      Context values are passed at validation time — how you pass them depends on your platform
+      (yup validation context, Java method parameters, etc.).
+    </p>
+  </main>
+</div>
+
+<footer>
+  <p>Open Form Spec &mdash; <a href="../">Home</a> &mdash; <a href="https://github.com/svenliebig/open-form-spec" target="_blank" rel="noopener">GitHub</a></p>
+</footer>
+
+</body>
+</html>

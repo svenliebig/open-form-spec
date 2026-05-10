@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Yup: Messages — Open Form Spec</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../doc.css">
+</head>
+<body>
+
+<nav>
+  <a href="../" class="nav-logo">
+    <span class="nav-logo-badge">OFS</span>
+    Open Form Spec
+  </a>
+  <ul class="nav-links">
+    <li><a href="../#problem">Why</a></li>
+    <li><a href="../#solution">How it works</a></li>
+    <li><a href="../#quickstart">Get started</a></li>
+    <li><a href="../#docs">Docs</a></li>
+    <li><a href="https://github.com/svenliebig/open-form-spec" target="_blank" rel="noopener">GitHub</a></li>
+  </ul>
+</nav>
+
+<div class="doc-layout">
+  <aside class="doc-sidebar">
+    <a href="../" class="sidebar-home">
+      <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M10 13L5 8l5-5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      Back to home
+    </a>
+    <div class="sidebar-title">Documentation</div>
+    <a href="01-introduction.html" class="sidebar-link">Introduction</a>
+    <a href="02-spec-format.html" class="sidebar-link">Spec Format</a>
+    <a href="03-architecture.html" class="sidebar-link">Architecture</a>
+    <a href="04-configuration.html" class="sidebar-link">Configuration</a>
+    <a href="05-plugins.html" class="sidebar-link">Plugins</a>
+    <a href="06-plugin-yup.html" class="sidebar-link">Plugin: Yup</a>
+    <a href="07-resolver.html" class="sidebar-link">Resolver</a>
+    <a href="08-plugin-yup-messages.html" class="sidebar-link active">Yup: Messages</a>
+  </aside>
+
+  <main class="doc-content">
+    <h1>Yup: Validation Messages</h1>
+
+    <h2>Overview</h2>
+    <p>
+      The <code>messages</code> option allows configuring custom validation messages for specific field types and states.
+      Messages are injected as arguments to state calls (e.g., <code>.required(message)</code>) in the generated schema.
+    </p>
+
+    <h2>Configuration</h2>
+    <pre><code>yupGenerator({
+  output: "src/generated/ofs",
+  enumImport: "@/api/generated/backend/index.schemas",
+  messages: {
+    "string:enum": {
+      required: {
+        factory: "VALIDATION_MESSAGES.REQUIRED_OPTION",
+        import: { name: "VALIDATION_MESSAGES", from: "@/constants/validation" },
+      },
+    },
+    "string": {
+      required: {
+        factory: "VALIDATION_MESSAGES.REQUIRED_TEXT",
+        import: { name: "VALIDATION_MESSAGES", from: "@/constants/validation" },
+      },
+    },
+  },
+})</code></pre>
+
+    <h2>Message Keys</h2>
+    <p>
+      Message keys follow the same resolution system as <code>types</code> keys, with one addition:
+    </p>
+    <table>
+      <thead><tr><th>Key</th><th>Matches</th></tr></thead>
+      <tbody>
+        <tr><td><code>"string"</code></td><td>All fields with OpenAPI type <code>string</code></td></tr>
+        <tr><td><code>"string:date"</code></td><td>Fields with type <code>string</code> and format <code>date</code></td></tr>
+        <tr><td><code>"string:enum"</code></td><td>Fields with a <code>$ref</code> to an enum schema (special key)</td></tr>
+        <tr><td><code>"number"</code></td><td>All fields with OpenAPI type <code>number</code></td></tr>
+        <tr><td><code>"boolean"</code></td><td>All fields with OpenAPI type <code>boolean</code></td></tr>
+      </tbody>
+    </table>
+    <p>Resolution priority (most specific wins): <code>type:format</code> / <code>type:enum</code> &gt; <code>type</code>.</p>
+
+    <h2>Supported States</h2>
+    <p>Messages can be configured for any field state:</p>
+    <table>
+      <thead><tr><th>State</th><th>Effect</th></tr></thead>
+      <tbody>
+        <tr><td><code>required</code></td><td>Passed as argument to <code>.required(message)</code></td></tr>
+        <tr><td><code>optional</code></td><td>Passed as argument to <code>.optional(message)</code></td></tr>
+      </tbody>
+    </table>
+
+    <h2>Generated Output</h2>
+    <p>
+      Given the configuration above and an enum field <code>accountType</code> with state <code>required</code>:
+    </p>
+    <pre><code>import { VALIDATION_MESSAGES } from "@/constants/validation";
+
+// In the schema shape:
+accountType: fields.accountType.required(VALIDATION_MESSAGES.REQUIRED_OPTION),</code></pre>
+
+    <h2>Message Override Interface</h2>
+    <p>Each message entry uses the same <code>TypeOverride</code> structure:</p>
+    <table>
+      <thead><tr><th>Property</th><th>Type</th><th>Description</th></tr></thead>
+      <tbody>
+        <tr><td><code>factory</code></td><td><code>string</code></td><td>Expression for the message (e.g., <code>"VALIDATION_MESSAGES.REQUIRED_OPTION"</code>)</td></tr>
+        <tr><td><code>import</code></td><td><code>{ name, from }</code></td><td>Import to add to the generated file. Omit if already available.</td></tr>
+      </tbody>
+    </table>
+  </main>
+</div>
+
+<footer>
+  <p>Open Form Spec &mdash; <a href="../">Home</a> &mdash; <a href="https://github.com/svenliebig/open-form-spec" target="_blank" rel="noopener">GitHub</a></p>
+</footer>
+
+</body>
+</html>

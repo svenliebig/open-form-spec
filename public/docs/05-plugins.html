@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Plugins — Open Form Spec</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../doc.css">
+</head>
+<body>
+
+<nav>
+  <a href="../" class="nav-logo">
+    <span class="nav-logo-badge">OFS</span>
+    Open Form Spec
+  </a>
+  <ul class="nav-links">
+    <li><a href="../#problem">Why</a></li>
+    <li><a href="../#solution">How it works</a></li>
+    <li><a href="../#quickstart">Get started</a></li>
+    <li><a href="../#docs">Docs</a></li>
+    <li><a href="https://github.com/svenliebig/open-form-spec" target="_blank" rel="noopener">GitHub</a></li>
+  </ul>
+</nav>
+
+<div class="doc-layout">
+  <aside class="doc-sidebar">
+    <a href="../" class="sidebar-home">
+      <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M10 13L5 8l5-5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      Back to home
+    </a>
+    <div class="sidebar-title">Documentation</div>
+    <a href="01-introduction.html" class="sidebar-link">Introduction</a>
+    <a href="02-spec-format.html" class="sidebar-link">Spec Format</a>
+    <a href="03-architecture.html" class="sidebar-link">Architecture</a>
+    <a href="04-configuration.html" class="sidebar-link">Configuration</a>
+    <a href="05-plugins.html" class="sidebar-link active">Plugins</a>
+    <a href="06-plugin-yup.html" class="sidebar-link">Plugin: Yup</a>
+    <a href="07-resolver.html" class="sidebar-link">Resolver</a>
+    <a href="08-plugin-yup-messages.html" class="sidebar-link">Yup: Messages</a>
+  </aside>
+
+  <main class="doc-content">
+    <h1>Plugins</h1>
+
+    <h2>Overview</h2>
+    <p>
+      Plugins are functions that receive parsed OFS specs and produce output.
+      They handle generation — the runner handles infrastructure.
+    </p>
+    <p>A plugin is an object with a <code>name</code> and a <code>run</code> method:</p>
+    <pre><code>interface OFSPlugin {
+  name: string;
+  run(context: OFSPluginContext): Promise&lt;OFSPluginResult&gt;;
+}</code></pre>
+
+    <h2>Plugin Context</h2>
+    <p>Every plugin receives the same context:</p>
+    <pre><code>interface OFSPluginContext {
+  /** All parsed OFS spec documents. */
+  specs: OFSDocument[];
+
+  /** OpenAPI enums, keyed by source name. */
+  openApiEnums: Record&lt;string, Record&lt;string, string[]&gt;&gt;;
+
+  /** OpenAPI schema properties, keyed by source → schema → property. */
+  openApiSchemas: Record&lt;string, OpenAPISchemas&gt;;
+
+  /** Absolute path to the directory containing ofs.config.js. */
+  rootDir: string;
+}</code></pre>
+
+    <h3>Accessing OpenAPI Info</h3>
+    <p>Enum values for a source:</p>
+    <pre><code>const values = context.openApiEnums["api"]["AccountType"];
+// ["PERSONAL", "BUSINESS", ...]</code></pre>
+    <p>Property type info for a DTO field:</p>
+    <pre><code>const schemas = context.openApiSchemas["backend"];
+const emailType = schemas["Registration"]["email"];
+// { type: "string" }
+
+const paymentType = schemas["Checkout"]["paymentMethod"];
+// { ref: "PaymentMethod" }</code></pre>
+
+    <h2>Plugin Result</h2>
+    <p>Plugins return files to write, errors, and warnings:</p>
+    <pre><code>interface OFSPluginResult {
+  /** Files to write. Paths are relative to rootDir unless absolute. */
+  files?: GeneratedFile[];
+
+  /** Errors that fail the build. */
+  errors?: PluginError[];
+
+  /** Warnings that get logged but don't fail. */
+  warnings?: string[];
+}</code></pre>
+    <p>
+      The runner writes files to disk. Plugins never touch the filesystem directly —
+      this makes them pure functions that are easy to test.
+    </p>
+
+    <h2>Writing a Plugin</h2>
+    <p>
+      A plugin is typically a factory function that takes options and returns the plugin object:
+    </p>
+    <pre><code>import type { OFSPlugin } from "@open-form-spec/plugin";
+
+interface MyPluginOptions {
+  output: string;
+}
+
+export function myPlugin(options: MyPluginOptions): OFSPlugin {
+  return {
+    name: "my-plugin",
+    async run(context) {
+      const files = context.specs.map((spec) =&gt; ({
+        path: `${options.output}/${spec.section}.ts`,
+        content: generateCode(spec, context),
+      }));
+
+      return { files };
+    },
+  };
+}
+
+function generateCode(spec, context) {
+  // Your generation logic here
+  return `// Generated for ${spec.section}\n`;
+}</code></pre>
+
+    <h3>Using in Config</h3>
+    <pre><code>import { defineConfig } from "@open-form-spec/plugin";
+import { myPlugin } from "./my-plugin.js";
+
+export default defineConfig({
+  specs: "specs/**/*.ofs.yaml",
+  plugins: [
+    myPlugin({ output: "src/generated" }),
+  ],
+});</code></pre>
+
+    <h3>Plugin Dependencies</h3>
+    <p>
+      For type information only, depend on <code>@open-form-spec/plugin</code>
+      (which re-exports types from <code>@open-form-spec/types</code>).
+      This is the only dependency a plugin needs for the API contract.
+    </p>
+    <p>
+      If your plugin needs the resolver (to evaluate field states),
+      also depend on <code>@open-form-spec/core</code>.
+    </p>
+
+    <h2>First-Party Plugins</h2>
+    <table>
+      <thead><tr><th>Plugin</th><th>Package</th><th>Description</th></tr></thead>
+      <tbody>
+        <tr>
+          <td>yup</td>
+          <td><code>@open-form-spec/plugin-yup</code></td>
+          <td>Generates type-preserving yup schemas with enum support, format-aware factories, and full TypeScript inference</td>
+        </tr>
+      </tbody>
+    </table>
+    <p>See the <a href="06-plugin-yup.html">yup plugin documentation</a> for details.</p>
+  </main>
+</div>
+
+<footer>
+  <p>Open Form Spec &mdash; <a href="../">Home</a> &mdash; <a href="https://github.com/svenliebig/open-form-spec" target="_blank" rel="noopener">GitHub</a></p>
+</footer>
+
+</body>
+</html>

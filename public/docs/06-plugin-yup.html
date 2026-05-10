@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Plugin: Yup — Open Form Spec</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../doc.css">
+</head>
+<body>
+
+<nav>
+  <a href="../" class="nav-logo">
+    <span class="nav-logo-badge">OFS</span>
+    Open Form Spec
+  </a>
+  <ul class="nav-links">
+    <li><a href="../#problem">Why</a></li>
+    <li><a href="../#solution">How it works</a></li>
+    <li><a href="../#quickstart">Get started</a></li>
+    <li><a href="../#docs">Docs</a></li>
+    <li><a href="https://github.com/svenliebig/open-form-spec" target="_blank" rel="noopener">GitHub</a></li>
+  </ul>
+</nav>
+
+<div class="doc-layout">
+  <aside class="doc-sidebar">
+    <a href="../" class="sidebar-home">
+      <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M10 13L5 8l5-5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      Back to home
+    </a>
+    <div class="sidebar-title">Documentation</div>
+    <a href="01-introduction.html" class="sidebar-link">Introduction</a>
+    <a href="02-spec-format.html" class="sidebar-link">Spec Format</a>
+    <a href="03-architecture.html" class="sidebar-link">Architecture</a>
+    <a href="04-configuration.html" class="sidebar-link">Configuration</a>
+    <a href="05-plugins.html" class="sidebar-link">Plugins</a>
+    <a href="06-plugin-yup.html" class="sidebar-link active">Plugin: Yup</a>
+    <a href="07-resolver.html" class="sidebar-link">Resolver</a>
+    <a href="08-plugin-yup-messages.html" class="sidebar-link">Yup: Messages</a>
+  </aside>
+
+  <main class="doc-content">
+    <h1>Plugin: Yup</h1>
+    <p>
+      The yup plugin generates <a href="https://github.com/jquense/yup" target="_blank" rel="noopener">yup</a>
+      validation schemas from OFS specs. It produces Layer 1 (field state) code that you combine with your
+      hand-written Layer 2 (content validation). Types are fully preserved — including enum narrowing from <code>.oneOf()</code>.
+    </p>
+
+    <h2>Installation</h2>
+    <pre><code>npm install --save-dev @open-form-spec/runner @open-form-spec/plugin @open-form-spec/plugin-yup</code></pre>
+
+    <h2>Setup</h2>
+    <div class="code-wrap">
+      <div class="code-label"><div class="code-dot"></div>ofs.config.js</div>
+      <pre><code>import { defineConfig } from "@open-form-spec/plugin";
+import { yupGenerator } from "@open-form-spec/plugin-yup";
+
+export default defineConfig({
+  specs: "specs/**/*.ofs.yaml",
+  openapi: { api: "openapi.yaml" },
+  plugins: [
+    yupGenerator({
+      output: "src/generated/ofs",
+      enumImport: "@/api/generated/backend/index.schemas",
+    }),
+  ],
+});</code></pre>
+    </div>
+    <p>Run <code>npx ofs generate</code> to produce one <code>.ofs.ts</code> file per spec section.</p>
+
+    <h2>Options</h2>
+    <table>
+      <thead><tr><th>Option</th><th>Type</th><th>Description</th></tr></thead>
+      <tbody>
+        <tr><td><code>output</code></td><td><code>string</code></td><td>Output directory for generated files, relative to config root</td></tr>
+        <tr><td><code>types</code></td><td><code>Record&lt;string, TypeOverride&gt;</code></td><td>Override yup schema factories per OpenAPI type or type:format (see <a href="#custom-type-factories">Custom Type Factories</a>)</td></tr>
+        <tr><td><code>enumImport</code></td><td><code>string</code></td><td>Import path for OpenAPI enum types. When set, enum fields auto-generate <code>.oneOf(Object.values(EnumName))</code> (see <a href="#enum-support">Enum Support</a>)</td></tr>
+      </tbody>
+    </table>
+
+    <h2>Generated Output</h2>
+    <p>For a spec like:</p>
+    <pre><code>section: registration
+dto: Registration
+
+imports:
+  enums:
+    AccountType: "api#AccountType"
+
+fields:
+  email:
+    state: required
+  accountType:
+    state: required
+  nickname:
+    state: optional</code></pre>
+    <p>The plugin generates:</p>
+    <div class="code-wrap">
+      <div class="code-label"><div class="code-dot"></div>registration.ofs.ts (auto-generated)</div>
+      <pre><code>import * as yup from "yup";
+import { AccountType } from "@/api/generated/backend/index.schemas";
+
+// Defaults as factory — deferred so yup.setLocale() runs before schema creation
+export const registrationDefaults = () =&gt; ({
+  email: yup.string(),
+  accountType: yup.string().oneOf(Object.values(AccountType)),
+  nickname: yup.string(),
+});
+export type RegistrationFields = ReturnType&lt;typeof registrationDefaults&gt;;
+
+// Generic function — overrides preserve specific types through spread
+export function registrationSchema&lt;T extends Partial&lt;RegistrationFields&gt;&gt;(
+  overrides?: T,
+) {
+  const fields = { ...registrationDefaults(), ...overrides };
+
+  return yup.object().shape({
+    email: fields.email.required(),
+    accountType: fields.accountType.required(),
+    nickname: fields.nickname.optional(),
+  });
+}</code></pre>
+    </div>
+
+    <h2>How It Works</h2>
+    <p>The generated code uses three TypeScript features to preserve types:</p>
+    <ol>
+      <li><strong><code>ReturnType&lt;typeof defaults&gt;</code></strong> — the <code>Fields</code> type is derived from the defaults factory return type,
+        so <code>.oneOf()</code> narrowing is captured automatically. The factory is deferred so <code>yup.setLocale()</code>
+        and custom message configuration runs before schema creation.</li>
+      <li><strong>Generic <code>&lt;T extends Partial&lt;Fields&gt;&gt;</code></strong> — when you pass overrides, TypeScript captures your specific types</li>
+      <li><strong>Object spread <code>{ ...defaults, ...overrides }</code></strong> — TypeScript preserves the override's type for each field,
+        falling back to the default's type for fields not overridden</li>
+    </ol>
+    <p>
+      This means <code>InferType&lt;typeof schema&gt;</code> produces the correct narrowed types —
+      enum fields show their actual values, not just <code>string</code>.
+    </p>
+
+    <h2>Combining Layer 1 and Layer 2</h2>
+
+    <h3>Layer 1 (generated)</h3>
+    <p>
+      Field presence rules. Handles <code>required()</code>, <code>optional()</code>, <code>strip()</code>,
+      and <code>when()</code> conditions. Enum constraints are also generated.
+      This is what the plugin produces — you never write this by hand.
+    </p>
+
+    <h3>Layer 2 (hand-written)</h3>
+    <p>
+      Additional content validation beyond what the spec + OpenAPI provide.
+      Only override fields where the generated default isn't enough:
+    </p>
+    <pre><code>import { registrationSchema } from "./generated/ofs/registration.ofs";
+
+// Only override what you need — defaults handle the rest
+export const schema = registrationSchema({
+  email: yup.string().email("Invalid email"),
+  password: yup.string().min(8, "At least 8 characters"),
+});</code></pre>
+    <p>
+      Fields you don't override keep their generated defaults (correct type, enum <code>.oneOf()</code>, format-specific factory).
+    </p>
+
+    <h3>What Layer 2 Should NOT Do</h3>
+    <p>
+      Layer 2 overrides should <strong>not</strong> call <code>.required()</code> or <code>.optional()</code> —
+      Layer 1 handles that. If an override calls <code>.required()</code>, it conflicts with Layer 1's conditional logic.
+    </p>
+    <p>
+      The rule: Layer 1 defines <em>whether a value must exist</em>. Layer 2 defines <em>what kind of value</em> is valid.
+    </p>
+
+    <h2>Type-Aware Generation</h2>
+    <p>When OpenAPI schemas are configured, the generator uses the correct yup type for each field:</p>
+    <table>
+      <thead><tr><th>OpenAPI type</th><th>Generated yup factory</th></tr></thead>
+      <tbody>
+        <tr><td><code>string</code></td><td><code>yup.string()</code></td></tr>
+        <tr><td><code>number</code></td><td><code>yup.number()</code></td></tr>
+        <tr><td><code>integer</code></td><td><code>yup.number().integer()</code></td></tr>
+        <tr><td><code>boolean</code></td><td><code>yup.boolean()</code></td></tr>
+        <tr><td><code>$ref</code> to enum</td><td><code>yup.string().oneOf(Object.values(EnumName))</code></td></tr>
+        <tr><td>unknown</td><td><code>yup.mixed()</code></td></tr>
+      </tbody>
+    </table>
+
+    <h2 id="enum-support">Enum Support</h2>
+    <p>
+      When <code>enumImport</code> is configured, fields that reference an OpenAPI enum schema via
+      <code>$ref</code> automatically generate <code>.oneOf(Object.values(EnumName))</code>:
+    </p>
+    <pre><code>yupGenerator({
+  output: "src/generated/ofs",
+  enumImport: "@/api/generated/backend/index.schemas",
+})</code></pre>
+    <p>Generated output for a field with <code>$ref: "#/components/schemas/OrderStatus"</code>:</p>
+    <pre><code>import { OrderStatus } from "@/api/generated/backend/index.schemas";
+
+export const orderDefaults = () =&gt; ({
+  status: yup.string().oneOf(Object.values(OrderStatus)),
+  // ...
+});</code></pre>
+    <p>
+      The <code>Fields</code> type automatically captures the narrowed enum type via
+      <code>ReturnType&lt;typeof orderDefaults&gt;</code> — so <code>OrderFields["status"]</code> is
+      <code>StringSchema&lt;"PENDING" | "CONFIRMED" | ... | undefined&gt;</code>, not just <code>StringSchema&lt;string&gt;</code>.
+    </p>
+    <p>Only enums actually referenced by fields in the spec are imported.</p>
+
+    <h2 id="custom-type-factories">Custom Type Factories</h2>
+    <p>
+      Override the yup schema factory for specific OpenAPI types. Keys can be a base type (<code>"string"</code>)
+      or a type:format combination (<code>"string:date"</code>). Format-specific overrides take priority.
+    </p>
+    <pre><code>yupGenerator({
+  output: "src/generated/ofs",
+  enumImport: "@/api/generated/backend/index.schemas",
+  types: {
+    string: {
+      factory: "string()",
+      import: { name: "string", from: "@/utils/validation/types" },
+    },
+    "string:date": {
+      factory: "dateString()",
+      import: { name: "dateString", from: "@/utils/validation/date-string" },
+    },
+  },
+})</code></pre>
+    <p>This generates:</p>
+    <pre><code>import { string } from "@/utils/validation/types";
+import { dateString } from "@/utils/validation/date-string";
+import { AccountType } from "@/api/generated/backend/index.schemas";
+
+export const registrationDefaults = () =&gt; ({
+  accountType: string().oneOf(Object.values(AccountType)),  // custom factory + enum
+  username: string(),                                        // custom factory
+  birthDate: dateString(),                                   // format-specific factory
+  // ...
+});</code></pre>
+
+    <p>The <code>TypeOverride</code> interface:</p>
+    <table>
+      <thead><tr><th>Property</th><th>Type</th><th>Description</th></tr></thead>
+      <tbody>
+        <tr><td><code>factory</code></td><td><code>string</code></td><td>Expression for the schema factory (e.g. <code>"string()"</code>, <code>"dateString()"</code>)</td></tr>
+        <tr><td><code>import</code></td><td><code>{ name, from }</code></td><td>Import to add to the generated file. Omit if using yup directly.</td></tr>
+      </tbody>
+    </table>
+    <p>Type resolution priority: <code>type:format</code> &gt; <code>type</code> &gt; built-in default &gt; <code>yup.mixed()</code>.</p>
+
+    <h2>Using with react-hook-form</h2>
+    <p>The schema function returns a complete <code>yup.ObjectSchema</code>:</p>
+    <pre><code>import { useForm } from "react-hook-form";
+import { yupResolver } from "@hookform/resolvers/yup";
+import { registrationSchema } from "./generated/ofs/registration.ofs";
+
+const schema = registrationSchema({
+  email: yup.string().email(),
+});
+
+function RegistrationForm() {
+  const { register, handleSubmit } = useForm({
+    resolver: yupResolver(schema),
+  });
+
+  return &lt;form onSubmit={handleSubmit(onSubmit)}&gt;...&lt;/form&gt;;
+}</code></pre>
+
+    <h2>Passing Context</h2>
+    <p>If your spec uses <code>context:</code> conditions, pass context when validating.</p>
+    <p><strong>With react-hook-form:</strong></p>
+    <pre><code>useForm({
+  resolver: yupResolver(schema),
+  context: {
+    config: { requirePhone: true, region: "DE" },
+  },
+});</code></pre>
+    <p><strong>With plain yup:</strong></p>
+    <pre><code>schema.validate(data, {
+  context: { config: { requirePhone: true } },
+});</code></pre>
+    <p><strong>Cross-section references</strong> use <code>context.crossSections</code>:</p>
+    <pre><code>schema.validate(data, {
+  context: {
+    crossSections: {
+      preferences: { separateBilling: true },
+    },
+  },
+});</code></pre>
+
+    <h2>Nested Fields</h2>
+    <p>
+      Nested objects in the spec generate nested <code>yup.object().shape()</code> calls.
+      Sub-fields use their factory directly (not through the spread).
+      Nested sub-fields are not currently overridable through the <code>overrides</code> parameter.
+    </p>
+
+    <h2>Field State Behavior</h2>
+    <table>
+      <thead><tr><th>Base state</th><th>Generated yup</th><th>Effect</th></tr></thead>
+      <tbody>
+        <tr><td><code>required</code></td><td><code>fields.name.required()</code></td><td>Typed schema + required</td></tr>
+        <tr><td><code>optional</code></td><td><code>fields.name.optional()</code></td><td>Typed schema, no required</td></tr>
+        <tr><td><code>forbidden</code></td><td><code>yup.mixed().optional().strip()</code></td><td>Value stripped, no validation</td></tr>
+      </tbody>
+    </table>
+    <p>For conditional fields, <code>when()</code> switches between states:</p>
+    <pre><code>// forbidden → required when condition matches
+cardNumber: fields.cardNumber.when("paymentMethod", {
+  is: (val) =&gt; val === "CREDIT_CARD",
+  then: (s) =&gt; s.required(),                      // override applied + required
+  otherwise: () =&gt; yup.mixed().optional().strip(), // stripped
+}),</code></pre>
+    <p>
+      When a field is <code>forbidden</code> in the <code>otherwise</code> clause,
+      <code>yup.mixed().strip()</code> is returned — discarding both the override and the default schema.
+      Content validation doesn't run on fields that shouldn't exist.
+    </p>
+  </main>
+</div>
+
+<footer>
+  <p>Open Form Spec &mdash; <a href="../">Home</a> &mdash; <a href="https://github.com/svenliebig/open-form-spec" target="_blank" rel="noopener">GitHub</a></p>
+</footer>
+
+</body>
+</html>

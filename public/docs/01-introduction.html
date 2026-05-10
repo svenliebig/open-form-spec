@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Introduction — Open Form Spec</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../doc.css">
+</head>
+<body>
+
+<nav>
+  <a href="../" class="nav-logo">
+    <span class="nav-logo-badge">OFS</span>
+    Open Form Spec
+  </a>
+  <ul class="nav-links">
+    <li><a href="../#problem">Why</a></li>
+    <li><a href="../#solution">How it works</a></li>
+    <li><a href="../#quickstart">Get started</a></li>
+    <li><a href="../#docs">Docs</a></li>
+    <li><a href="https://github.com/svenliebig/open-form-spec" target="_blank" rel="noopener">GitHub</a></li>
+  </ul>
+</nav>
+
+<div class="doc-layout">
+  <aside class="doc-sidebar">
+    <a href="../" class="sidebar-home">
+      <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M10 13L5 8l5-5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      Back to home
+    </a>
+    <div class="sidebar-title">Documentation</div>
+    <a href="01-introduction.html" class="sidebar-link active">Introduction</a>
+    <a href="02-spec-format.html" class="sidebar-link">Spec Format</a>
+    <a href="03-architecture.html" class="sidebar-link">Architecture</a>
+    <a href="04-configuration.html" class="sidebar-link">Configuration</a>
+    <a href="05-plugins.html" class="sidebar-link">Plugins</a>
+    <a href="06-plugin-yup.html" class="sidebar-link">Plugin: Yup</a>
+    <a href="07-resolver.html" class="sidebar-link">Resolver</a>
+    <a href="08-plugin-yup-messages.html" class="sidebar-link">Yup: Messages</a>
+  </aside>
+
+  <main class="doc-content">
+    <h1>Introduction</h1>
+
+    <h2>What is Open Form Spec?</h2>
+    <p>
+      Open Form Spec (OFS) is a declarative specification for form field state rules. It defines whether fields are
+      <strong>required</strong>, <strong>optional</strong>, or <strong>forbidden</strong> based on form values and external context.
+    </p>
+    <p>
+      OFS sits between your OpenAPI spec and your application code. Where OpenAPI defines <em>what</em> your API looks like,
+      OFS defines <em>when</em> each field should exist.
+    </p>
+    <pre><code>OpenAPI Spec          Open Form Spec          Application Code
+─────────────         ──────────────          ────────────────
+field types    ──►    field states     ──►    validation (yup, Java)
+enum values           when conditions         form rendering
+DTO schemas           context rules           transformers</code></pre>
+
+    <h2>The Problem</h2>
+    <p>
+      In applications with both a frontend and backend, field state rules are duplicated across multiple layers:
+    </p>
+    <p><strong>Frontend:</strong></p>
+    <ul>
+      <li>Validation schema (yup, zod) — <code>.required()</code>, <code>.optional()</code>, <code>.when()</code></li>
+      <li>Form rendering — conditionally shows/hides fields</li>
+      <li>API transformer — strips or keeps values before sending to the backend</li>
+    </ul>
+    <p><strong>Backend:</strong></p>
+    <ul>
+      <li>Validator classes — re-implements the same required/optional/forbidden logic</li>
+    </ul>
+    <p>
+      These four places encode the same business rule. For example:
+      <em>"companyName is required when accountType is BUSINESS."</em>
+      When they drift apart, three things happen:
+    </p>
+    <ol>
+      <li><strong>Ghost data</strong> — a field is hidden in the UI but its old value persists in the database</li>
+      <li><strong>Inconsistent validation</strong> — frontend allows a submission the backend rejects, or vice versa</li>
+      <li><strong>Downstream corruption</strong> — invalid field combinations propagate to external systems</li>
+    </ol>
+    <p>
+      The root cause is not that validation exists in multiple places — it's that there is no single source of truth
+      for which fields should exist under which conditions.
+    </p>
+
+    <h2>The Solution: Two Layers</h2>
+    <p>OFS separates validation into two layers:</p>
+
+    <h3>Layer 1: Field State (declarative, from OFS)</h3>
+    <p>
+      Declares whether each field is <code>required</code>, <code>optional</code>, or <code>forbidden</code>
+      given the current form values and context. This layer causes the most bugs and is simple enough to express in YAML.
+    </p>
+    <pre><code>fields:
+  companyName:
+    state: forbidden
+    when:
+      - field: accountType
+        is: AccountType.BUSINESS
+        then: required</code></pre>
+
+    <h3>Layer 2: Field Content (hand-written, platform-native)</h3>
+    <p>
+      Value-level validation like date ranges, string length, email format, and cross-field comparisons.
+      These stay in yup, zod, Java validators, or whatever your platform uses.
+    </p>
+    <pre><code>// Layer 2: only override what you need — defaults handle the rest
+import { registrationSchema } from "./generated/ofs/registration.ofs";
+
+const schema = registrationSchema({
+  email: yup.string().email(),
+  password: yup.string().min(8),
+});</code></pre>
+    <p>
+      The key insight: Layer 2 can safely assume Layer 1 has passed. If a field is <code>required</code>,
+      Layer 2 knows the value is present. If a field is <code>forbidden</code>, Layer 2 never runs — the value is stripped.
+    </p>
+
+    <h2>How It Works</h2>
+    <ol>
+      <li>You write <code>.ofs.yaml</code> files that define field states and conditions</li>
+      <li>The OFS tooling validates your specs against your OpenAPI definitions</li>
+      <li>Plugins generate platform-specific code (yup schemas, Java test fixtures, etc.)</li>
+      <li>Your application uses the generated Layer 1 code, combined with hand-written Layer 2 validation</li>
+    </ol>
+    <pre><code>.ofs.yaml ──► ofs validate ──► ofs generate ──► generated code
+                   │                                  │
+                   ▼                                  ▼
+             OpenAPI spec              your Layer 2 validation code
+           (enum + type check)            (combined at build time)</code></pre>
+  </main>
+</div>
+
+<footer>
+  <p>Open Form Spec &mdash; <a href="../">Home</a> &mdash; <a href="https://github.com/svenliebig/open-form-spec" target="_blank" rel="noopener">GitHub</a></p>
+</footer>
+
+</body>
+</html>

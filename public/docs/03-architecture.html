@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Architecture — Open Form Spec</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../doc.css">
+</head>
+<body>
+
+<nav>
+  <a href="../" class="nav-logo">
+    <span class="nav-logo-badge">OFS</span>
+    Open Form Spec
+  </a>
+  <ul class="nav-links">
+    <li><a href="../#problem">Why</a></li>
+    <li><a href="../#solution">How it works</a></li>
+    <li><a href="../#quickstart">Get started</a></li>
+    <li><a href="../#docs">Docs</a></li>
+    <li><a href="https://github.com/svenliebig/open-form-spec" target="_blank" rel="noopener">GitHub</a></li>
+  </ul>
+</nav>
+
+<div class="doc-layout">
+  <aside class="doc-sidebar">
+    <a href="../" class="sidebar-home">
+      <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M10 13L5 8l5-5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      Back to home
+    </a>
+    <div class="sidebar-title">Documentation</div>
+    <a href="01-introduction.html" class="sidebar-link">Introduction</a>
+    <a href="02-spec-format.html" class="sidebar-link">Spec Format</a>
+    <a href="03-architecture.html" class="sidebar-link active">Architecture</a>
+    <a href="04-configuration.html" class="sidebar-link">Configuration</a>
+    <a href="05-plugins.html" class="sidebar-link">Plugins</a>
+    <a href="06-plugin-yup.html" class="sidebar-link">Plugin: Yup</a>
+    <a href="07-resolver.html" class="sidebar-link">Resolver</a>
+    <a href="08-plugin-yup-messages.html" class="sidebar-link">Yup: Messages</a>
+  </aside>
+
+  <main class="doc-content">
+    <h1>Architecture</h1>
+
+    <h2>Package Overview</h2>
+    <pre><code>open-form-spec/
+├── schema.json                    # JSON Schema for .ofs.yaml intellisense
+├── examples/                      # Abstract fixtures for testing
+├── docs/                          # This documentation
+└── packages/
+    ├── types/                     # @open-form-spec/types
+    ├── core/                      # @open-form-spec/core
+    ├── validator/                 # @open-form-spec/validator
+    ├── plugin/                    # @open-form-spec/plugin
+    ├── runner/                    # @open-form-spec/runner
+    └── plugin-yup/                # @open-form-spec/plugin-yup</code></pre>
+
+    <h2>Packages</h2>
+
+    <h3>@open-form-spec/types</h3>
+    <p>
+      Zero-dependency type definitions for the OFS document model and OpenAPI types.
+    </p>
+    <p>
+      Everything else depends on this package. It defines the shape of parsed <code>.ofs.yaml</code> documents
+      (<code>OFSDocument</code>, <code>FieldDefinition</code>, <code>WhenEntry</code>, etc.) and OpenAPI property info
+      (<code>OpenAPIPropertyInfo</code>, <code>OpenAPISchemas</code>).
+    </p>
+
+    <h3>@open-form-spec/core</h3>
+    <p>Parser and resolver. The runtime heart of OFS.</p>
+    <ul>
+      <li><code>parseOFS(filePath)</code> — reads a <code>.ofs.yaml</code> file and returns a typed <code>OFSDocument</code></li>
+      <li><code>resolveFieldStates(doc, input)</code> — evaluates all field states given form values and context,
+        returns a flat map of <code>fieldName → "required" | "optional" | "forbidden"</code></li>
+    </ul>
+    <p>
+      The resolver is the reference implementation of OFS condition evaluation.
+      Plugins and generators should produce behavior consistent with it.
+    </p>
+
+    <h3>@open-form-spec/validator</h3>
+    <p>Build-time validation of OFS documents.</p>
+    <ul>
+      <li><code>validate(doc, options)</code> — checks an OFS document against the JSON Schema, verifies enum imports exist
+        in the OpenAPI spec, validates individual enum values, and checks condition structure</li>
+      <li><code>extractEnumsFromOpenAPI(filePath)</code> — extracts enum definitions from an OpenAPI spec</li>
+      <li><code>extractSchemasFromOpenAPI(filePath)</code> — extracts DTO property types from an OpenAPI spec</li>
+    </ul>
+
+    <h3>@open-form-spec/plugin</h3>
+    <p>Plugin API types and configuration helper. This is what plugin authors and config files import.</p>
+    <ul>
+      <li><code>OFSPlugin</code> — the interface every plugin implements</li>
+      <li><code>OFSPluginContext</code> — what plugins receive (specs, enums, schemas, rootDir)</li>
+      <li><code>OFSPluginResult</code> — what plugins return (files, errors, warnings)</li>
+      <li><code>OFSPluginFactory&lt;T&gt;</code> — type for plugin factory functions</li>
+      <li><code>defineConfig(config)</code> — identity function for config file type inference</li>
+    </ul>
+
+    <h3>@open-form-spec/runner</h3>
+    <p>CLI that loads the config, parses specs, validates, and runs plugins.</p>
+    <pre><code>npx ofs generate                   # validate + run all plugins
+npx ofs validate                   # validate only
+npx ofs generate --plugin yup      # run a specific plugin
+npx ofs generate --config my.js    # custom config path</code></pre>
+    <p>
+      The runner handles infrastructure (file discovery, OpenAPI loading, file writing).
+      Plugins handle generation.
+    </p>
+
+    <h3>@open-form-spec/plugin-yup</h3>
+    <p>First-party plugin. Generates yup validation schemas from OFS specs.</p>
+    <p>Produces per section:</p>
+    <ul>
+      <li><code>{section}Defaults</code> — exported const with typed defaults (including enum <code>.oneOf()</code> narrowing)</li>
+      <li><code>{Section}Fields</code> — type derived from <code>typeof defaults</code>, preserves all narrowed types</li>
+      <li><code>{section}Schema(overrides?)</code> — generic function that spreads defaults with user overrides,
+        applies Layer 1 states, returns <code>yup.ObjectSchema</code></li>
+    </ul>
+    <p>
+      Features: OpenAPI type-aware generation, format-specific type overrides (<code>string:date</code> → <code>dateString()</code>),
+      automatic enum <code>.oneOf()</code> from <code>$ref</code>, full TypeScript type preservation through object spread.
+    </p>
+
+    <h2>Dependency Graph</h2>
+    <pre><code>@open-form-spec/types          (no deps)
+    ▲
+    │
+    ├── @open-form-spec/core           (types, yaml)
+    ├── @open-form-spec/plugin         (types)
+    ├── @open-form-spec/validator      (types, ajv, yaml)
+    │
+    ▼
+@open-form-spec/runner         (types, core, validator, plugin)
+@open-form-spec/plugin-yup     (types, plugin)</code></pre>
+
+    <h2>Build Order</h2>
+    <p>Packages must be built in dependency order:</p>
+    <pre><code>types → plugin → core → validator → runner → plugin-yup</code></pre>
+    <p>The root <code>npm run build</code> handles this automatically.</p>
+
+    <h2>Data Flow</h2>
+    <pre><code>ofs.config.js
+    │
+    ▼
+┌─────────┐    ┌──────────────┐    ┌───────────┐
+│  Runner  │───►│  .ofs.yaml   │───►│  Parser   │──► OFSDocument[]
+│          │    │  files       │    │  (core)   │
+│          │    └──────────────┘    └───────────┘
+│          │
+│          │    ┌──────────────┐    ┌───────────┐
+│          │───►│  OpenAPI     │───►│ Validator │──► enums + schemas
+│          │    │  specs       │    │           │     + errors
+│          │    └──────────────┘    └───────────┘
+│          │
+│          │    ┌──────────────┐
+│          │───►│  Plugins     │──► GeneratedFile[]
+│          │    │              │     + errors
+│          │    └──────────────┘     + warnings
+│          │
+│          │───► Write files to disk
+└─────────┘</code></pre>
+    <p>
+      Plugins receive already-parsed, already-validated specs. They produce files and/or errors.
+      They don't touch the filesystem directly — the runner writes their output.
+    </p>
+  </main>
+</div>
+
+<footer>
+  <p>Open Form Spec &mdash; <a href="../">Home</a> &mdash; <a href="https://github.com/svenliebig/open-form-spec" target="_blank" rel="noopener">GitHub</a></p>
+</footer>
+
+</body>
+</html>
