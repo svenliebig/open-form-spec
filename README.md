@@ -44,6 +44,7 @@ OFS sits between your OpenAPI spec and your application code. Where OpenAPI defi
 | [Plugins](docs/05-plugins.md) | Plugin API, writing custom plugins |
 | [Plugin: Yup](docs/06-plugin-yup.md) | Yup generator: Layer 1 + Layer 2, react-hook-form integration |
 | [Resolver](docs/07-resolver.md) | Runtime field state evaluation |
+| [Publishing](docs/09-publishing.md) | Changeset workflow: adding changesets, version PRs, npm publishing |
 
 ## Usage
 
