@@ -59,19 +59,19 @@ The plugin generates:
 import * as yup from "yup";
 import { AccountType } from "@/api/generated/backend/index.schemas";
 
-// Defaults with enum narrowing — types are inferred
-export const registrationDefaults = {
+// Defaults as factory — deferred so yup.setLocale() runs before schema creation
+export const registrationDefaults = () => ({
   email: yup.string(),
   accountType: yup.string().oneOf(Object.values(AccountType)),
   nickname: yup.string(),
-};
-export type RegistrationFields = typeof registrationDefaults;
+});
+export type RegistrationFields = ReturnType<typeof registrationDefaults>;
 
 // Generic function — overrides preserve specific types through spread
 export function registrationSchema<T extends Partial<RegistrationFields>>(
   overrides?: T,
 ) {
-  const fields = { ...registrationDefaults, ...overrides };
+  const fields = { ...registrationDefaults(), ...overrides };
 
   return yup.object().shape({
     email: fields.email.required(),
@@ -85,7 +85,7 @@ export function registrationSchema<T extends Partial<RegistrationFields>>(
 
 The generated code uses three TypeScript features to preserve types:
 
-1. **`typeof defaults`** — the `Fields` type is derived from the defaults object, so `.oneOf()` narrowing (e.g. `"PENDING" | "CONFIRMED" | "SHIPPED"`) is captured automatically
+1. **`ReturnType<typeof defaults>`** — the `Fields` type is derived from the defaults factory return type, so `.oneOf()` narrowing (e.g. `"PENDING" | "CONFIRMED" | "SHIPPED"`) is captured automatically. The factory is deferred so `yup.setLocale()` and custom message configuration runs before schema creation.
 2. **Generic `<T extends Partial<Fields>>`** — when you pass overrides, TypeScript captures your specific types
 3. **Object spread `{ ...defaults, ...overrides }`** — TypeScript preserves the override's type for each field, falling back to the default's type for fields not overridden
 
@@ -148,13 +148,13 @@ Generated output for a field with `$ref: "#/components/schemas/OrderStatus"`:
 ```typescript
 import { OrderStatus } from "@/api/generated/backend/index.schemas";
 
-export const orderDefaults = {
+export const orderDefaults = () => ({
   status: yup.string().oneOf(Object.values(OrderStatus)),
   // ...
-};
+});
 ```
 
-The `Fields` type automatically captures the narrowed enum type via `typeof orderDefaults` — so `OrderFields["status"]` is `StringSchema<"PENDING" | "CONFIRMED" | ... | undefined>`, not just `StringSchema<string>`.
+The `Fields` type automatically captures the narrowed enum type via `ReturnType<typeof orderDefaults>` — so `OrderFields["status"]` is `StringSchema<"PENDING" | "CONFIRMED" | ... | undefined>`, not just `StringSchema<string>`.
 
 Only enums actually referenced by fields in the spec are imported.
 
@@ -186,12 +186,12 @@ import { string } from "@/utils/validation/types";
 import { dateString } from "@/utils/validation/date-string";
 import { AccountType } from "@/api/generated/backend/index.schemas";
 
-export const registrationDefaults = {
+export const registrationDefaults = () => ({
   accountType: string().oneOf(Object.values(AccountType)),  // custom factory + enum
   username: string(),                                        // custom factory
   birthDate: dateString(),                                   // format-specific factory
   // ...
-};
+});
 ```
 
 The `TypeOverride` interface:

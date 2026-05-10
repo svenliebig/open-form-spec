@@ -70,9 +70,9 @@ export function generateYupCode(
   }
   lines.push("");
 
-  // 2. Defaults object (types are inferred, including .oneOf() narrowing)
+  // 2. Defaults factory (lazy so yup.setLocale() / custom messages are applied before schema creation)
   const defaultsName = `${spec.section}Defaults`;
-  lines.push(`export const ${defaultsName} = {`);
+  lines.push(`export const ${defaultsName} = () => ({`);
   for (const [name] of overridableFields) {
     const factory = resolveFieldFactory(name, ctx);
     const enumName = resolveEnumRef(name, ctx);
@@ -82,11 +82,11 @@ export function generateYupCode(
       lines.push(`  ${name}: ${factory},`);
     }
   }
-  lines.push("};");
+  lines.push("});");
 
-  // 3. Fields type — derived from defaults, preserves .oneOf() narrowing
+  // 3. Fields type — derived from factory return type, preserves .oneOf() narrowing
   const fieldsTypeName = pascalCase(spec.section) + "Fields";
-  lines.push(`export type ${fieldsTypeName} = typeof ${defaultsName};`);
+  lines.push(`export type ${fieldsTypeName} = ReturnType<typeof ${defaultsName}>;`);
 
   // 4. Schema function
   const schemaFnName = `${spec.section}Schema`;
@@ -109,7 +109,7 @@ export function generateYupCode(
   );
 
   // Spread defaults with overrides
-  lines.push(`  const fields = { ...${defaultsName}, ...overrides };\n`);;
+  lines.push(`  const fields = { ...${defaultsName}(), ...overrides };\n`);;
   lines.push("");
 
   // Shape
