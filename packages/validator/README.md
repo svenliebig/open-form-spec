@@ -1,11 +1,11 @@
-# @ofs/validator
+# @open-form-spec/validator
 
-Validates `.ofs.yaml` files against the OFS JSON schema and checks field/enum references against OpenAPI specs. Used internally by `@ofs/runner` — you only need this package directly if you are building custom tooling.
+Validates `.ofs.yaml` files against the OFS JSON schema and checks field/enum references against OpenAPI specs. Used internally by `@open-form-spec/runner` — you only need this package directly if you are building custom tooling.
 
 ## Install
 
 ```bash
-npm install @ofs/validator
+npm install @open-form-spec/validator
 ```
 
 ## API
@@ -15,7 +15,7 @@ npm install @ofs/validator
 Validates a set of parsed OFS documents against the schema and optional OpenAPI data.
 
 ```typescript
-import { validate } from "@ofs/validator";
+import { validate } from "@open-form-spec/validator";
 
 const errors = await validate({
   specs: [doc],
@@ -35,7 +35,7 @@ if (errors.length > 0) {
 Extracts all enum values from a parsed OpenAPI document.
 
 ```typescript
-import { extractEnumsFromOpenAPI } from "@ofs/validator";
+import { extractEnumsFromOpenAPI } from "@open-form-spec/validator";
 
 const enums = extractEnumsFromOpenAPI(openapiDoc);
 // { AccountType: ["PERSONAL", "BUSINESS"] }
@@ -46,7 +46,7 @@ const enums = extractEnumsFromOpenAPI(openapiDoc);
 Extracts property type/format information from all schemas in a parsed OpenAPI document.
 
 ```typescript
-import { extractSchemasFromOpenAPI } from "@ofs/validator";
+import { extractSchemasFromOpenAPI } from "@open-form-spec/validator";
 
 const schemas = extractSchemasFromOpenAPI(openapiDoc);
 // { Registration: { email: { type: "string", format: "email" } } }

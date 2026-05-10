@@ -1,11 +1,11 @@
-# @ofs/core
+# @open-form-spec/core
 
 YAML parser and runtime field state resolver for [Open Form Spec](../../README.md).
 
 ## Install
 
 ```bash
-npm install @ofs/core
+npm install @open-form-spec/core
 ```
 
 ## API
@@ -15,7 +15,7 @@ npm install @ofs/core
 Parses an `.ofs.yaml` file string into an `OFSDocument`.
 
 ```typescript
-import { parseOFS } from "@ofs/core";
+import { parseOFS } from "@open-form-spec/core";
 import { readFileSync } from "node:fs";
 
 const doc = parseOFS(readFileSync("registration.ofs.yaml", "utf8"));
@@ -27,7 +27,7 @@ const doc = parseOFS(readFileSync("registration.ofs.yaml", "utf8"));
 Evaluates all `when` conditions against live form values and context to produce a flat map of field states.
 
 ```typescript
-import { resolveFieldStates } from "@ofs/core";
+import { resolveFieldStates } from "@open-form-spec/core";
 
 const states = resolveFieldStates({
   spec: doc,
@@ -54,4 +54,4 @@ const states = resolveFieldStates({
 
 ## Notes
 
-This package is used by `@ofs/runner` at build time and can be used directly in browser or server runtimes to evaluate field states without a build step.
+This package is used by `@open-form-spec/runner` at build time and can be used directly in browser or server runtimes to evaluate field states without a build step.

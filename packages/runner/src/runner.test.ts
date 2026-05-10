@@ -4,7 +4,7 @@ import { resolve } from "node:path";
 import { existsSync, unlinkSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { run } from "./runner.js";
-import type { OFSConfig } from "@ofs/plugin";
+import type { OFSConfig } from "@open-form-spec/plugin";
 
 const __dirname = fileURLToPath(new URL(".", import.meta.url));
 const rootDir = resolve(__dirname, "../../..");

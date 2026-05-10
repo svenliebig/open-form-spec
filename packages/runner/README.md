@@ -1,11 +1,11 @@
-# @ofs/runner
+# @open-form-spec/runner
 
 CLI and programmatic runner for [Open Form Spec](../../README.md). Loads your `ofs.config.js`, validates specs, and orchestrates plugins.
 
 ## Install
 
 ```bash
-npm install --save-dev @ofs/runner
+npm install --save-dev @open-form-spec/runner
 ```
 
 ## CLI
@@ -35,7 +35,7 @@ npx ofs generate -c path/to/ofs.config.js
 ## Programmatic API
 
 ```typescript
-import { run, loadConfig } from "@ofs/runner";
+import { run, loadConfig } from "@open-form-spec/runner";
 
 const { config, rootDir } = await loadConfig();
 

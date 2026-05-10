@@ -68,9 +68,9 @@ npx ofs generate          # validate + run all plugins
 
 | Package | Description |
 |---------|-------------|
-| `@ofs/types` | Type definitions (zero deps) |
-| `@ofs/core` | YAML parser + field state resolver |
-| `@ofs/validator` | Schema + enum validation against OpenAPI |
-| `@ofs/plugin` | Plugin API types + `defineConfig` |
-| `@ofs/runner` | CLI, config loading, plugin orchestration |
-| `@ofs/plugin-yup` | Generates type-preserving yup schemas with enum support and format-aware factories |
+| `@open-form-spec/types` | Type definitions (zero deps) |
+| `@open-form-spec/core` | YAML parser + field state resolver |
+| `@open-form-spec/validator` | Schema + enum validation against OpenAPI |
+| `@open-form-spec/plugin` | Plugin API types + `defineConfig` |
+| `@open-form-spec/runner` | CLI, config loading, plugin orchestration |
+| `@open-form-spec/plugin-yup` | Generates type-preserving yup schemas with enum support and format-aware factories |

@@ -1,4 +1,4 @@
-import type { OFSDocument, OpenAPISchemas } from "@ofs/types";
+import type { OFSDocument, OpenAPISchemas } from "@open-form-spec/types";
 
 // --- Plugin API ---
 

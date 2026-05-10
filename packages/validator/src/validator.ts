@@ -5,8 +5,8 @@ import type {
   FieldDefinition,
   OFSDocument,
   WhenEntry,
-} from "@ofs/types";
-import { isCompoundWhen } from "@ofs/types";
+} from "@open-form-spec/types";
+import { isCompoundWhen } from "@open-form-spec/types";
 import type { OpenAPIEnums } from "./openapi.js";
 
 export interface ValidationError {

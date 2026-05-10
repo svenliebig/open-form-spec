@@ -75,7 +75,7 @@ The runner writes files to disk. Plugins never touch the filesystem directly —
 A plugin is typically a factory function that takes options and returns the plugin object:
 
 ```typescript
-import type { OFSPlugin } from "@ofs/plugin";
+import type { OFSPlugin } from "@open-form-spec/plugin";
 
 interface MyPluginOptions {
   output: string;
@@ -104,7 +104,7 @@ function generateCode(spec, context) {
 ### Using in Config
 
 ```javascript
-import { defineConfig } from "@ofs/plugin";
+import { defineConfig } from "@open-form-spec/plugin";
 import { myPlugin } from "./my-plugin.js";
 
 export default defineConfig({
@@ -117,14 +117,14 @@ export default defineConfig({
 
 ### Plugin Dependencies
 
-For type information only, depend on `@ofs/plugin` (which re-exports types from `@ofs/types`). This is the only dependency a plugin needs for the API contract.
+For type information only, depend on `@open-form-spec/plugin` (which re-exports types from `@open-form-spec/types`). This is the only dependency a plugin needs for the API contract.
 
-If your plugin needs the resolver (to evaluate field states), also depend on `@ofs/core`.
+If your plugin needs the resolver (to evaluate field states), also depend on `@open-form-spec/core`.
 
 ## First-Party Plugins
 
 | Plugin | Package | Description |
 |--------|---------|-------------|
-| yup | `@ofs/plugin-yup` | Generates type-preserving yup schemas with enum support, format-aware factories, and full TypeScript inference |
+| yup | `@open-form-spec/plugin-yup` | Generates type-preserving yup schemas with enum support, format-aware factories, and full TypeScript inference |
 
 See the [yup plugin documentation](./06-plugin-yup.md) for details.

@@ -4,8 +4,8 @@ import type {
   FieldState,
   OFSDocument,
   WhenEntry,
-} from "@ofs/types";
-import { isCompoundWhen } from "@ofs/types";
+} from "@open-form-spec/types";
+import { isCompoundWhen } from "@open-form-spec/types";
 
 export interface ResolveInput {
   values: Record<string, unknown>;

@@ -1,5 +1,5 @@
 {
-  "name": "@ofs/runner",
+  "name": "@open-form-spec/runner",
   "version": "0.1.0",
   "description": "CLI and programmatic runner for Open Form Spec code generation",
   "license": "MIT",
@@ -27,10 +27,10 @@
     "test": "node --test dist/**/*.test.js"
   },
   "dependencies": {
-    "@ofs/core": "0.1.0",
-    "@ofs/plugin": "0.1.0",
-    "@ofs/types": "0.1.0",
-    "@ofs/validator": "0.1.0"
+    "@open-form-spec/core": "0.1.0",
+    "@open-form-spec/plugin": "0.1.0",
+    "@open-form-spec/types": "0.1.0",
+    "@open-form-spec/validator": "0.1.0"
   },
   "devDependencies": {
     "@types/node": "^22.0.0",

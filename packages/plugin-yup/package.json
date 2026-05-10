@@ -1,5 +1,5 @@
 {
-  "name": "@ofs/plugin-yup",
+  "name": "@open-form-spec/plugin-yup",
   "version": "0.1.0",
   "description": "Yup schema generator plugin for Open Form Spec",
   "license": "MIT",
@@ -24,12 +24,12 @@
     "test": "node --test dist/**/*.test.js"
   },
   "dependencies": {
-    "@ofs/plugin": "0.1.0",
-    "@ofs/types": "0.1.0"
+    "@open-form-spec/plugin": "0.1.0",
+    "@open-form-spec/types": "0.1.0"
   },
   "devDependencies": {
-    "@ofs/core": "0.1.0",
-    "@ofs/validator": "0.1.0",
+    "@open-form-spec/core": "0.1.0",
+    "@open-form-spec/validator": "0.1.0",
     "@types/node": "^22.0.0",
     "typescript": "~5.8.0"
   }

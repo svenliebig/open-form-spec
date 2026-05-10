@@ -1,5 +1,5 @@
 {
-  "name": "@ofs/validator",
+  "name": "@open-form-spec/validator",
   "version": "0.1.0",
   "description": "OFS spec validation against JSON schema and OpenAPI",
   "license": "MIT",
@@ -24,12 +24,12 @@
     "test": "node --test dist/**/*.test.js"
   },
   "dependencies": {
-    "@ofs/types": "0.1.0",
+    "@open-form-spec/types": "0.1.0",
     "ajv": "^8.17.0",
     "yaml": "^2.7.0"
   },
   "devDependencies": {
-    "@ofs/core": "0.1.0",
+    "@open-form-spec/core": "0.1.0",
     "@types/node": "^22.0.0",
     "typescript": "~5.8.0"
   }

@@ -1,17 +1,17 @@
-# @ofs/plugin
+# @open-form-spec/plugin
 
 Plugin contract types and `defineConfig` helper for [Open Form Spec](../../README.md). Use this package when writing a custom plugin or authoring an `ofs.config.js`.
 
 ## Install
 
 ```bash
-npm install @ofs/plugin
+npm install @open-form-spec/plugin
 ```
 
 ## Writing a plugin
 
 ```typescript
-import type { OFSPlugin, OFSPluginFactory } from "@ofs/plugin";
+import type { OFSPlugin, OFSPluginFactory } from "@open-form-spec/plugin";
 
 interface MyOptions {
   output: string;
@@ -33,8 +33,8 @@ export const myPlugin: OFSPluginFactory<MyOptions> = (options) => ({
 
 ```javascript
 // ofs.config.js
-import { defineConfig } from "@ofs/plugin";
-import { yupGenerator } from "@ofs/plugin-yup";
+import { defineConfig } from "@open-form-spec/plugin";
+import { yupGenerator } from "@open-form-spec/plugin-yup";
 
 export default defineConfig({
   specs: "src/specs/**/*.ofs.yaml",

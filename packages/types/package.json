@@ -1,5 +1,5 @@
 {
-  "name": "@ofs/types",
+  "name": "@open-form-spec/types",
   "version": "0.1.0",
   "description": "Shared TypeScript type definitions for Open Form Spec",
   "license": "MIT",

@@ -1,7 +1,7 @@
 import { existsSync } from "node:fs";
 import { resolve, dirname } from "node:path";
 import { pathToFileURL } from "node:url";
-import type { OFSConfig } from "@ofs/plugin";
+import type { OFSConfig } from "@open-form-spec/plugin";
 
 const CONFIG_FILES = ["ofs.config.js", "ofs.config.mjs"];
 

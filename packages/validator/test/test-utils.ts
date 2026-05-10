@@ -1,5 +1,5 @@
-import { parseOFS } from "@ofs/core";
-import type { OFSDocument } from "@ofs/types";
+import { parseOFS } from "@open-form-spec/core";
+import type { OFSDocument } from "@open-form-spec/types";
 import { resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import type { OpenAPIEnums } from "../src/openapi.js";

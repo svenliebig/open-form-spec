@@ -1,4 +1,4 @@
-# @ofs/plugin-yup
+# @open-form-spec/plugin-yup
 
 Generates type-preserving [yup](https://github.com/jquense/yup) validation schemas from Open Form Spec files.
 
@@ -8,8 +8,8 @@ The generated code handles **Layer 1** — field states (`required` / `optional`
 
 ```javascript
 // ofs.config.js
-import { defineConfig } from "@ofs/plugin";
-import { yupGenerator } from "@ofs/plugin-yup";
+import { defineConfig } from "@open-form-spec/plugin";
+import { yupGenerator } from "@open-form-spec/plugin-yup";
 
 export default defineConfig({
   specs: "src/specs/**/*.ofs.yaml",

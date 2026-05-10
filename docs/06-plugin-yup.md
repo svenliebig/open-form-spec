@@ -6,8 +6,8 @@ The yup plugin generates [yup](https://github.com/jquense/yup) validation schema
 
 ```javascript
 // ofs.config.js
-import { defineConfig } from "@ofs/plugin";
-import { yupGenerator } from "@ofs/plugin-yup";
+import { defineConfig } from "@open-form-spec/plugin";
+import { yupGenerator } from "@open-form-spec/plugin-yup";
 
 export default defineConfig({
   specs: "specs/**/*.ofs.yaml",

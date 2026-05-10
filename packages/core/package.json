@@ -1,5 +1,5 @@
 {
-  "name": "@ofs/core",
+  "name": "@open-form-spec/core",
   "version": "0.1.0",
   "description": "YAML parser and field state resolver for Open Form Spec",
   "license": "MIT",
@@ -24,7 +24,7 @@
     "test": "node --test dist/**/*.test.js"
   },
   "dependencies": {
-    "@ofs/types": "0.1.0",
+    "@open-form-spec/types": "0.1.0",
     "yaml": "^2.7.0"
   },
   "devDependencies": {

@@ -1,11 +1,11 @@
-# @ofs/types
+# @open-form-spec/types
 
 Shared TypeScript type definitions for [Open Form Spec](../../README.md). Zero runtime code — types only.
 
 ## Install
 
 ```bash
-npm install @ofs/types
+npm install @open-form-spec/types
 ```
 
 ## Exports
@@ -25,7 +25,7 @@ npm install @ofs/types
 ## Usage
 
 ```typescript
-import type { OFSDocument, FieldDefinition, WhenEntry } from "@ofs/types";
+import type { OFSDocument, FieldDefinition, WhenEntry } from "@open-form-spec/types";
 ```
 
-This package is consumed by every other `@ofs/*` package. If you are writing a custom plugin you likely want `@ofs/plugin` instead, which re-exports the types you need alongside the plugin contract.
+This package is consumed by every other `@open-form-spec/*` package. If you are writing a custom plugin you likely want `@open-form-spec/plugin` instead, which re-exports the types you need alongside the plugin contract.
