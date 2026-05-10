@@ -10,6 +10,7 @@ jobs:
     permissions:
       contents: write       # changesets: push version bump commits
       pull-requests: write  # changesets: create/update the Version PR
+      id-token: write       # npm trusted publishing (OIDC)
     steps:
       - uses: actions/checkout@v4
 
@@ -27,4 +28,3 @@ jobs:
           publish: npm run release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
