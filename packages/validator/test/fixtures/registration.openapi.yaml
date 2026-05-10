@@ -1,0 +1,64 @@
+openapi: 3.0.3
+info:
+  title: Registration Example API
+  version: 0.1.0
+  description: Minimal OpenAPI spec for testing OFS enum validation.
+
+paths: {}
+
+components:
+  schemas:
+    AccountType:
+      type: string
+      enum:
+        - PERSONAL
+        - BUSINESS
+        - FREELANCER
+
+    Country:
+      type: string
+      enum:
+        - DE
+        - AT
+        - CH
+        - US
+        - CA
+        - FR
+
+    Registration:
+      type: object
+      properties:
+        email:
+          type: string
+        password:
+          type: string
+        nickname:
+          type: string
+        phone:
+          type: string
+        accountType:
+          $ref: "#/components/schemas/AccountType"
+        companyName:
+          type: string
+        taxId:
+          type: string
+        vatNumber:
+          type: string
+        billingEmail:
+          type: string
+        address:
+          $ref: "#/components/schemas/Address"
+
+    Address:
+      type: object
+      properties:
+        street:
+          type: string
+        city:
+          type: string
+        zip:
+          type: string
+        country:
+          $ref: "#/components/schemas/Country"
+        state:
+          type: string

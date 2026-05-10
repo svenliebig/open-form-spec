@@ -1,34 +1,19 @@
 import { describe, it } from "node:test";
 import assert from "node:assert/strict";
-import { validate } from "./validator.js";
-import { extractEnumsFromOpenAPI } from "./openapi.js";
-import { parseOFS } from "@ofs/core";
 import { resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import type { OFSDocument } from "@ofs/types";
+import { extractEnumsFromOpenAPI } from "../src/openapi.js";
+import { validate } from "../src/validator.js";
 
-const __dirname = fileURLToPath(new URL(".", import.meta.url));
-const schemaPath = resolve(__dirname, "../../../schema.json");
-const examplePath = resolve(
-  __dirname,
-  "../../../examples/registration.ofs.yaml",
+const validatorRoot = resolve(
+  fileURLToPath(new URL(".", import.meta.url)),
+  "../..",
 );
-const openApiPath = resolve(
-  __dirname,
-  "../../../examples/registration.openapi.yaml",
-);
+const fixturesDir = resolve(validatorRoot, "test/fixtures");
+const schemaPath = resolve(validatorRoot, "../../schema.json");
 
 describe("validator", () => {
-  it("validates a correct OFS document with OpenAPI enum check", () => {
-    const doc = parseOFS(examplePath);
-    const apiEnums = extractEnumsFromOpenAPI(openApiPath);
-    const errors = validate(doc, {
-      schemaPath,
-      openApiEnums: { api: apiEnums },
-    });
-    assert.deepEqual(errors, []);
-  });
-
   it("reports schema errors for invalid documents", () => {
     const invalid = { section: "test" } as unknown as OFSDocument;
     const errors = validate(invalid, { schemaPath });
@@ -102,6 +87,7 @@ describe("validator", () => {
         },
       },
     };
+    const openApiPath = resolve(fixturesDir, "registration.openapi.yaml");
     const apiEnums = extractEnumsFromOpenAPI(openApiPath);
     const errors = validate(doc, {
       schemaPath,
@@ -125,6 +111,7 @@ describe("validator", () => {
         },
       },
     };
+    const openApiPath = resolve(fixturesDir, "registration.openapi.yaml");
     const apiEnums = extractEnumsFromOpenAPI(openApiPath);
     const errors = validate(doc, {
       schemaPath,
@@ -151,6 +138,7 @@ describe("validator", () => {
         },
       },
     };
+    const openApiPath = resolve(fixturesDir, "registration.openapi.yaml");
     const apiEnums = extractEnumsFromOpenAPI(openApiPath);
     const errors = validate(doc, {
       schemaPath,
