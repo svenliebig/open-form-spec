@@ -7,6 +7,46 @@ const { code, validate } = loadFixture({
   openapi: { api: "checkout.openapi.yaml" },
 });
 
+// --- With messages for when conditions ---
+
+const { code: msgCode } = loadFixture({
+  name: "checkout",
+  testResultName: "checkout.with-messages",
+  openapi: { api: "checkout.openapi.yaml" },
+  messages: {
+    string: {
+      required: {
+        factory: "VALIDATION_MESSAGES.REQUIRED_TEXT",
+        import: { name: "VALIDATION_MESSAGES", from: "@/constants/validation" },
+      },
+    },
+  },
+});
+
+describe("checkout with messages in when conditions", () => {
+  it("passes message in then callback for single when", () => {
+    assert.ok(
+      msgCode.includes(
+        "then: (s: yup.Schema) => s.required(VALIDATION_MESSAGES.REQUIRED_TEXT)",
+      ),
+    );
+  });
+
+  it("passes message in simple required field", () => {
+    assert.ok(
+      msgCode.includes(
+        "email: fields.email.required(VALIDATION_MESSAGES.REQUIRED_TEXT),",
+      ),
+    );
+  });
+
+  it("does not pass message for forbidden state", () => {
+    assert.ok(
+      msgCode.includes("otherwise: () => yup.mixed().optional().strip()"),
+    );
+  });
+});
+
 describe("checkout yup generation (end-to-end)", () => {
   it("validates the OFS spec", () => {
     assert.deepEqual(validate(), []);

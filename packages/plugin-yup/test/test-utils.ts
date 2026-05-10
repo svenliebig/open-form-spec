@@ -55,6 +55,8 @@ export interface FixtureOptions {
   types?: Record<string, TypeOverride>;
   /** Import path for enum types. When set, enum fields generate .oneOf(Object.values(EnumName)). */
   enumImport?: string;
+  /** Validation messages per type key and state. */
+  messages?: Record<string, Record<string, TypeOverride>>;
 }
 
 /**
@@ -102,6 +104,7 @@ export function loadFixture(options: FixtureOptions): TestFixture {
     types: options.types,
     enums: allEnums,
     enumImport: options.enumImport,
+    messages: options.messages,
   });
 
   // Write test result file for inspection

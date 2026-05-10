@@ -56,3 +56,128 @@ describe("order with enumImport", () => {
     assert.ok(code.includes("export type OrderFields = typeof orderDefaults;"));
   });
 });
+
+// --- With messages ---
+
+const { code: msgCode } = loadFixture({
+  name: "order",
+  testResultName: "order.with-messages",
+  openapi: { api: "order.openapi.yaml" },
+  enumImport: "@/api/generated/backend/index.schemas",
+  messages: {
+    "string:enum": {
+      required: {
+        factory: "VALIDATION_MESSAGES.REQUIRED_OPTION",
+        import: { name: "VALIDATION_MESSAGES", from: "@/constants/validation" },
+      },
+    },
+  },
+});
+
+describe("order with messages", () => {
+  it("imports the message constant", () => {
+    assert.ok(
+      msgCode.includes(
+        'import { VALIDATION_MESSAGES } from "@/constants/validation"',
+      ),
+    );
+  });
+
+  it("passes message to required() for enum field status", () => {
+    assert.ok(
+      msgCode.includes(
+        "status: fields.status.required(VALIDATION_MESSAGES.REQUIRED_OPTION),",
+      ),
+    );
+  });
+
+  it("does not pass message to required() for plain string field customerName", () => {
+    assert.ok(
+      msgCode.includes("customerName: fields.customerName.required(),"),
+    );
+  });
+
+  it("does not pass message to optional() for enum field priority (no optional message configured)", () => {
+    assert.ok(msgCode.includes("priority: fields.priority.optional(),"));
+  });
+
+  it("does not pass message to optional() for plain string field notes", () => {
+    assert.ok(msgCode.includes("notes: fields.notes.optional(),"));
+  });
+});
+
+// --- With messages for base string type ---
+
+const { code: stringMsgCode } = loadFixture({
+  name: "order",
+  testResultName: "order.with-string-messages",
+  openapi: { api: "order.openapi.yaml" },
+  enumImport: "@/api/generated/backend/index.schemas",
+  messages: {
+    string: {
+      required: {
+        factory: "VALIDATION_MESSAGES.REQUIRED_TEXT",
+        import: { name: "VALIDATION_MESSAGES", from: "@/constants/validation" },
+      },
+    },
+  },
+});
+
+describe("order with string base messages", () => {
+  it("passes message to required() for plain string field customerName", () => {
+    assert.ok(
+      stringMsgCode.includes(
+        "customerName: fields.customerName.required(VALIDATION_MESSAGES.REQUIRED_TEXT),",
+      ),
+    );
+  });
+
+  it("passes message to required() for enum field status (falls back to string)", () => {
+    assert.ok(
+      stringMsgCode.includes(
+        "status: fields.status.required(VALIDATION_MESSAGES.REQUIRED_TEXT),",
+      ),
+    );
+  });
+});
+
+// --- With messages priority: string:enum overrides string ---
+
+const { code: priorityMsgCode } = loadFixture({
+  name: "order",
+  testResultName: "order.with-priority-messages",
+  openapi: { api: "order.openapi.yaml" },
+  enumImport: "@/api/generated/backend/index.schemas",
+  messages: {
+    string: {
+      required: {
+        factory: "VALIDATION_MESSAGES.REQUIRED_TEXT",
+        import: { name: "VALIDATION_MESSAGES", from: "@/constants/validation" },
+      },
+    },
+    "string:enum": {
+      required: {
+        factory: "VALIDATION_MESSAGES.REQUIRED_OPTION",
+        import: { name: "VALIDATION_MESSAGES", from: "@/constants/validation" },
+      },
+    },
+  },
+});
+
+describe("order with message priority (string:enum over string)", () => {
+  it("uses string:enum message for enum field status", () => {
+    assert.ok(
+      priorityMsgCode.includes(
+        "status: fields.status.required(VALIDATION_MESSAGES.REQUIRED_OPTION),",
+      ),
+    );
+  });
+
+  it("uses string message for plain string field customerName", () => {
+    assert.ok(
+      priorityMsgCode.includes(
+        "customerName: fields.customerName.required(VALIDATION_MESSAGES.REQUIRED_TEXT),",
+      ),
+    );
+  });
+});

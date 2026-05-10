@@ -23,6 +23,22 @@ export interface YupGeneratorOptions {
    * enumImport: "@/api/generated/backend/index.schemas"
    */
   enumImport?: string;
+  /**
+   * Validation messages per type key and state. Keys follow the same resolution
+   * as `types` ("string", "string:date", "string:enum"). Each state maps to a
+   * TypeOverride with the message expression and optional import.
+   *
+   * @example
+   * messages: {
+   *   "string:enum": {
+   *     required: {
+   *       factory: "VALIDATION_MESSAGES.REQUIRED_OPTION",
+   *       import: { name: "VALIDATION_MESSAGES", from: "@/constants/validation" },
+   *     },
+   *   },
+   * }
+   */
+  messages?: Record<string, Record<string, TypeOverride>>;
 }
 
 export function yupGenerator(options: YupGeneratorOptions): OFSPlugin {
@@ -36,6 +52,7 @@ export function yupGenerator(options: YupGeneratorOptions): OFSPlugin {
           types: options.types,
           enums: resolveEnums(spec, context.openApiEnums),
           enumImport: options.enumImport,
+          messages: options.messages,
         }),
       }));
 
